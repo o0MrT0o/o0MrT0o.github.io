@@ -1,0 +1,28 @@
+name: Fetch Mars Dust Assets
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download NASA/JPL source media
+        run: |
+          set -euo pipefail
+          mkdir -p assets
+          curl -L --fail --retry 3 -o assets/PIA26572_coring.mp4 'https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia26/pia26572/PIA26572.mp4'
+          curl -L --fail --retry 3 -o assets/PIA24039_curiosity2020.gif 'https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia24/pia24039/PIA24039.gif'
+          curl -L --fail --retry 3 -o assets/PIA21481_dune2017.gif 'https://assets.science.nasa.gov/content/dam/science/psd/mars/downloadable_items/3/9/39617_martian-dust-devil-pia21481.gif'
+          curl -L --fail --retry 3 -o assets/PIA26074_thorofare.gif 'https://photojournal.jpl.nasa.gov/archive/PIA26074.gif'
+          curl -L --fail --retry 3 -o assets/PIA26528_merging.gif 'https://photojournal.jpl.nasa.gov/archive/PIA26528.gif'
+          ls -lh assets
+          sha256sum assets/* > assets/SHA256SUMS.txt
+      - name: Upload source media
+        uses: actions/upload-artifact@v4
+        with:
+          name: mars-dust-source-media
+          path: assets/
+          retention-days: 1
