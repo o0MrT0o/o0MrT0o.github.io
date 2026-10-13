@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Veluno Studio — Eco Mart, gra o recyklingu i odbudowie planet. Kontakt i polityka prywatności.">
+  <link rel="icon" href="assets/icon.png" type="image/png">
+  <title>Veluno Studio — Eco Mart</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #132831; color: #edf9f4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; line-height: 1.65; }
+    main { max-width: 920px; margin: auto; padding: 64px 24px; }
+    header { display: flex; gap: 28px; align-items: center; margin-bottom: 44px; }
+    .icon { width: 148px; height: 148px; flex-shrink: 0; }
+    .studio { color: #89e5b6; font-weight: 700; letter-spacing: .06em; margin: 0 0 6px; }
+    h1 { font-size: clamp(32px, 6vw, 52px); line-height: 1.15; margin: 0 0 16px; }
+    h2 { margin-top: 0; font-size: 22px; }
+    p { margin: 0 0 16px; }
+    .lead { max-width: 570px; color: #c2d6d7; font-size: 19px; }
+    .sections { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    section { border: 1px solid #42646b; border-radius: 16px; padding: 26px; }
+    a { color: #a4f1c8; text-underline-offset: .2em; overflow-wrap: anywhere; }
+    a:focus-visible { outline: 3px solid #ffe1a1; outline-offset: 4px; }
+    .link { display: inline-block; padding-block: 12px; min-height: 48px; }
+    footer { margin-top: 36px; color: #b7cdcf; font-size: 14px; }
+    @media (max-width: 580px) { main { padding: 36px 20px; } header { align-items: start; gap: 18px; } .icon { width: 88px; height: 88px; } .sections { grid-template-columns: 1fr; } }
+    @media (max-width: 360px) { header { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <img class="icon" src="assets/icon.png" alt="Planeta i Recykler Eco Mart" width="148" height="148">
+      <div><p class="studio">Veluno Studio</p><h1>Eco Mart</h1><p class="lead">Od zbierania odpadów do automatyzacji recyklingu i zarządzania planetami.</p></div>
+    </header>
+    <div class="sections">
+      <section><h2>Przywracaj planetom życie</h2><p>Zbieraj odpady, rozwijaj maszyny i wyposażenie, wysyłaj roboty do sprzątania. Kolejne wyprawy prowadzą od zielonej Viridii do lodowych, pustynnych i oceanicznych krajobrazów.</p><p>W późniejszych etapach przejmujesz zarządzanie z góry: kontrolujesz zapasy, produkcję i dostawy do statku.</p></section>
+      <section><h2>Kontakt i prywatność</h2><p>Kontakt z wydawcą oraz pytania o dane i raporty diagnostyczne:</p><p><a class="link" href="mailto:velunostudio.dev@gmail.com">velunostudio.dev@gmail.com</a></p><a class="link" href="privacy.html">Polityka prywatności Eco Mart</a></section>
+    </div>
+    <footer>Veluno Studio · Grafika ikony: Kenney, CC0. <a href="assets/ICON-SOURCES.txt">Źródła i licencje</a></footer>
+  </main>
+</body>
+</html>
