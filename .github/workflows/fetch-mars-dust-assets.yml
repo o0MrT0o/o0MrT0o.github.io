@@ -13,21 +13,18 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p assets
-          curl -L --fail --retry 3 -o assets/PIA26572_coring.mp4 'https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia26/pia26572/PIA26572.mp4'
           curl -L --fail --retry 3 -o assets/PIA24039_curiosity2020.gif 'https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia24/pia24039/PIA24039.gif'
           curl -L --fail --retry 3 -o assets/PIA21481_dune2017.gif 'https://assets.science.nasa.gov/content/dam/science/psd/mars/downloadable_items/3/9/39617_martian-dust-devil-pia21481.gif'
           curl -L --fail --retry 3 -o assets/PIA26074_thorofare.gif 'https://commons.wikimedia.org/wiki/Special:Redirect/file/PIA26074-MarsPerseveranceRover-Whirlwind-20230830.gif'
+          curl -L --fail --retry 3 -o assets/PIA25290_multiple.gif 'https://commons.wikimedia.org/wiki/Special:Redirect/file/PIA25290_Perseverance_Views_Dust_Devils_Swirling_Across_Jezero_Crater.gif'
           file assets/*
           sha256sum assets/* > assets/SHA256SUMS.txt
       - name: Validate media types
         run: |
-          file assets/PIA26074_thorofare.gif | grep -q 'GIF image data'
-          file assets/PIA24039_curiosity2020.gif | grep -q 'GIF image data'
-          file assets/PIA21481_dune2017.gif | grep -q 'GIF image data'
-          file assets/PIA26572_coring.mp4 | grep -q 'ISO Media'
+          for f in assets/*.gif; do file "$f" | grep -q 'GIF image data'; done
       - name: Upload source media
         uses: actions/upload-artifact@v4
         with:
-          name: mars-dust-source-media-v2
+          name: mars-dust-source-media-v3
           path: assets/
           retention-days: 1
