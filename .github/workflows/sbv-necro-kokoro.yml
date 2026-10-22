@@ -1,0 +1,29 @@
+name: SBV Necrobotics Kokoro Voice
+on:
+  push:
+    branches:
+      - sbv-necrobotics-temp-20261022
+    paths:
+      - '.github/workflows/sbv-necro-kokoro.yml'
+permissions:
+  contents: read
+jobs:
+  narrator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install approved synthesis engine
+        run: python -m pip install -q "kokoro-onnx==0.6.1" onnxruntime soundfile requests
+      - name: Generate exactly matched SBV narrator
+        run: python sbv_necrobotics/synth_voice.py
+      - name: Preserve narrated WAV and verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-necro-approved-voice
+          path: |
+            voice/SBV_NECROBOTICS_af_heart_088.wav
+            voice/narration_qa.json
+          if-no-files-found: warn
+          retention-days: 3
