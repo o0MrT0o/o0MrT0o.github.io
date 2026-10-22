@@ -5,6 +5,7 @@ on:
       - sbv-necrobotics-temp-20261022
     paths:
       - '.github/workflows/sbv-necrobotics-recovery.yml'
+      - 'sbv_necrobotics/recover_necro.py'
 permissions:
   contents: read
 jobs:
