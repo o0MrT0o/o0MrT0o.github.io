@@ -10,13 +10,14 @@ permissions:
 jobs:
   recover:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Ensure dependencies
+      - name: Install diagnostic dependencies
         run: |
           python -m pip install -q requests
-          ffmpeg -version | head -2
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
       - name: Retrieve original scientific supplementary video files
         run: python sbv_necrobotics/recover_necro.py
       - name: Save recovered evidence and report
