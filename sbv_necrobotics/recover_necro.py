@@ -10,7 +10,7 @@ def dl(url,timeout=120):
  say('STATUS',r.status_code,'SIZE',len(r.content),'MIME',r.headers.get('Content-Type'))
  r.raise_for_status();return r.content
 try:
- data=dl('https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9561765/supplementaryFiles',180)
+ data=dl('https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9561765/supplementaryFiles?includeInlineImage=no',180)
  if not zipfile.is_zipfile(io.BytesIO(data)):raise RuntimeError('Not ZIP: '+repr(data[:200]))
  with zipfile.ZipFile(io.BytesIO(data)) as archive:
   allnames=archive.namelist();say('ZIP_ENTRIES',allnames[:80])
