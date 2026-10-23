@@ -1,0 +1,29 @@
+name: SBV Necrobotics V7 Ending Voice
+on:
+  push:
+    branches:
+      - sbv-necrobotics-temp-20261022
+    paths:
+      - '.github/workflows/sbv-necro-v7-voice.yml'
+permissions:
+  contents: read
+jobs:
+  narrator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install approved Kokoro engine
+        run: python -m pip install -q "kokoro-onnx==0.6.1" onnxruntime soundfile requests
+      - name: Synthesize ending
+        run: python sbv_necrobotics/synth_v7_ending.py
+      - name: Save WAV and SHA256 verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-v7-ending-voice
+          path: |
+            voice/SBV_NECROBOTICS_V7_ENDING_af_heart_088.wav
+            voice/ending_qa.json
+          if-no-files-found: warn
+          retention-days: 3
