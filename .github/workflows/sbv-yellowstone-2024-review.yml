@@ -1,0 +1,32 @@
+name: SBV Yellowstone 2024 Real Footage Review
+on:
+  push:
+    branches:
+      - sbv-necrobotics-temp-20261022
+    paths:
+      - '.github/workflows/sbv-yellowstone-2024-review.yml'
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install packages
+        run: |
+          python -m pip install -q requests pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Review 2024 USGS explosion film
+        run: python sbv_yellowstone/review_2024.py
+      - name: Save frame contact and probe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-yellowstone-2024-scene-review
+          path: |
+            yellowstone_2024/contact.jpg
+            yellowstone_2024/probe.json
+          if-no-files-found: warn
+          retention-days: 3
