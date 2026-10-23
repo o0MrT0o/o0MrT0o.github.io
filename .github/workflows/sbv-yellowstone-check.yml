@@ -1,0 +1,30 @@
+name: SBV Yellowstone HD Source Audit
+on:
+  push:
+    branches:
+      - sbv-necrobotics-temp-20261022
+    paths:
+      - '.github/workflows/sbv-yellowstone-check.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install video tools
+        run: |
+          python -m pip install -q requests
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Verify source resolution and duration
+        run: python sbv_yellowstone/verify_sources.py
+      - name: Save diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-yellowstone-original-videos
+          path: yellowstone_sources/
+          if-no-files-found: warn
+          retention-days: 3
