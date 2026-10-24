@@ -1,0 +1,33 @@
+name: SBV Whale 2026 Research Footage Verification
+on:
+  push:
+    branches:
+      - sbv-whales-20261024
+    paths:
+      - '.github/workflows/sbv-whale-2026-review.yml'
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare
+        run: |
+          python -m pip install -q requests
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Check study video
+        run: python sbv_whales/check_figshare.py
+      - name: Save inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-whale-2026-study-footage
+          path: |
+            new_research_2026/*.json
+            new_research_2026/*.mp4
+            new_research_2026/*.webm
+          retention-days: 3
+          if-no-files-found: warn
