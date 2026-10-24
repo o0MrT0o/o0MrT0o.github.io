@@ -1,0 +1,34 @@
+name: SBV Whales Additional Authentic Footage
+on:
+  push:
+    branches:
+      - sbv-whales-20261024
+    paths:
+      - '.github/workflows/sbv-whales-extra.yml'
+permissions:
+  contents: read
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install analysis dependencies
+        run: |
+          python -m pip install -q requests pillow yt-dlp
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Fetch and inspect real footage
+        run: python sbv_whales/recover_extra.py
+      - name: Save footage and inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-whales-extra-real-footage
+          path: |
+            whale_extra/*.webm
+            whale_extra/*.mp4
+            whale_extra/*.json
+            whale_extra/commons_contact.jpg
+          retention-days: 3
+          if-no-files-found: warn
