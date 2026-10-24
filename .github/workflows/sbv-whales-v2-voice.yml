@@ -1,0 +1,27 @@
+name: SBV Whales V2 Corrected Narration
+on:
+  push:
+    branches:
+      - sbv-whales-20261024
+    paths:
+      - '.github/workflows/sbv-whales-v2-voice.yml'
+permissions:
+  contents: read
+jobs:
+  narrator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install approved voice engine
+        run: python -m pip install -q 'kokoro-onnx==0.6.1' onnxruntime soundfile requests
+      - name: Produce corrected narration
+        run: python sbv_whales/synth_v2.py
+      - name: Save only output WAV and metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-whales-v2-voice
+          path: |
+            voice_v2/*.wav
+            voice_v2/*.json
+          retention-days: 3
