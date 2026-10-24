@@ -1,0 +1,35 @@
+name: SBV Whales Authentic Sources and Kokoro
+on:
+  push:
+    branches:
+      - sbv-whales-20261024
+    paths:
+      - '.github/workflows/sbv-whales-assets.yml'
+permissions:
+  contents: read
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install audio/video science dependencies
+        run: |
+          python -m pip install -q 'kokoro-onnx==0.6.1' onnxruntime soundfile requests yt-dlp
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Recover authentic media and synthesize narrator
+        run: python sbv_whales/whales_assets.py
+      - name: Package no models (only media and voice)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-whales-real-footage-and-approved-voice
+          path: |
+            whale_recovered/*.mp4
+            whale_recovered/*.webm
+            whale_recovered/*.wav
+            whale_recovered/*.json
+            whale_recovered/*.txt
+          retention-days: 3
+          if-no-files-found: warn
