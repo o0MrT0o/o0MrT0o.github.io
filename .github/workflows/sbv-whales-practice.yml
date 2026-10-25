@@ -1,0 +1,29 @@
+name: SBV Whales Additional HD Research Review
+on:
+  push:
+    branches: [sbv-whales-20261024]
+    paths: ['.github/workflows/sbv-whales-practice.yml']
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare
+        run: |
+          python -m pip install -q requests pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Inspect raw licensed study
+        run: python sbv_whales/review_practice.py
+      - name: Save only preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-whales-practice-review
+          path: |
+            practice_footage/contact.jpg
+            practice_footage/meta.json
+          retention-days: 3
