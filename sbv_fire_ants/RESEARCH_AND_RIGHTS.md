@@ -1,0 +1,6 @@
+# Research notes & claims audit
+Primary paper: Mlot, Tovey & Hu (2011), PNAS. The paper reports that fire ants link bodies together to form rafts, that the linked bodies trap air and produce a water-resistant structure, and that rafts containing 500, 3,000 and 8,000 ants were studied. It describes raft formation from dense groups and reports the structure reaching equilibrium within minutes.
+Primary paper: Ko et al. (2022), “Fire ant rafts elongate along fluid flows,” Bioinspiration & Biomimetics. Reports raft elongation along flow driven by active ant movement, not just erosion.
+Data: Vernerey & White (2025), Dryad DOI 10.5061/dryad.d51c5b0cv, “Dynamic self-organization in fire ant rafts underpins collective longevity and threat responsiveness.” Dryad reuse guide states its datasets are CC0; credit is recommended.
+Use of language: “researchers observed” for measured lab results; do not claim a precise survival duration unless a primary source in the final cut supports it. Avoid saying all fire ant rafts are “waterproof”; say water-resistant / buoyant due to air entrapment and body linkage.
+Visual caveat: laboratory footage must be labelled as laboratory footage; time-lapse must be labelled if sped up. Avoid showing unrelated ants as if they are fire ants or implying footage documents a natural flood when it was filmed in a lab.
