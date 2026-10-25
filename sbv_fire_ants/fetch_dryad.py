@@ -1,7 +1,7 @@
 from pathlib import Path
 import requests,json,zipfile,subprocess,io,os,shutil
 ROOT=Path("."); src=ROOT/"sbv_fire_ants"/"source";src.mkdir(parents=True,exist_ok=True)
-api="https://datadryad.org/api/v2/datasets/doi:10.5061/dryad.d51c5b0cv"
+api="https://datadryad.org/api/v2/datasets/doi%3A10.5061%2Fdryad.d51c5b0cv"
 r=requests.get(api,timeout=45);r.raise_for_status();data=r.json()
 (ROOT/"sbv_fire_ants"/"dryad_metadata.json").write_text(json.dumps(data,indent=2))
 files=data.get("files",[])
