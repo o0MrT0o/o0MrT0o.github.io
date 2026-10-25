@@ -1,0 +1,28 @@
+name: SBV Whales V4 Licensed Scene Export
+on:
+  push:
+    branches: [sbv-whales-20261024]
+    paths: ['.github/workflows/sbv-whales-v4-source.yml']
+permissions:
+  contents: read
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare
+        run: |
+          python -m pip install -q requests
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Extract actual research footage only
+        run: python sbv_whales/export_v4_practice.py
+      - name: Save real scene clips
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-whales-v4-licensed-scenes
+          path: |
+            v4_source_clips/practice_*.mp4
+            v4_source_clips/clip_manifest.json
+          retention-days: 3
