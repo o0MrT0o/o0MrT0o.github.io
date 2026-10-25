@@ -1,0 +1,29 @@
+name: SBV Fire Ants Research Footage
+on:
+  push:
+    branches: [sbv-whales-20261024]
+    paths: ['.github/workflows/sbv-fire-ants-source.yml']
+permissions:
+  contents: read
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install media inspection
+        run: |
+          python -m pip install -q requests
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Fetch CC0 dataset videos
+        run: python sbv_fire_ants/fetch_dryad.py
+      - name: Upload source videos and manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-fire-ants-cc0-source-footage
+          path: |
+            sbv_fire_ants/source/**
+            sbv_fire_ants/video_manifest.json
+            sbv_fire_ants/dryad_metadata.json
+          retention-days: 3
