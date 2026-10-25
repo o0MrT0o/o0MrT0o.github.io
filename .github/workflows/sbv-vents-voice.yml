@@ -1,0 +1,27 @@
+name: SBV Hydrothermal Longform Narration
+on:
+  push:
+    branches: [sbv-hydrothermal-longform-20261025]
+    paths: ['.github/workflows/sbv-vents-voice.yml']
+permissions:
+  contents: read
+jobs:
+  narrator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Kokoro approved voice system
+        run: python -m pip install -q 'kokoro-onnx==0.6.1' onnxruntime soundfile numpy requests
+      - name: Generate five documentary chapter recordings
+        run: python sbv_vents/synth_long_narrator.py
+      - name: Preserve narration and timing
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbv-vents-longform-approved-narration
+          path: |
+            voice_output/*.wav
+            voice_output/voice_timeline.json
+          retention-days: 3
+          if-no-files-found: warn
