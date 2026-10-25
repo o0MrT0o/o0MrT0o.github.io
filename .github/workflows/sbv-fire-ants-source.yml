@@ -2,7 +2,7 @@ name: SBV Fire Ants Research Footage
 on:
   push:
     branches: [sbv-whales-20261024]
-    paths: ['.github/workflows/sbv-fire-ants-source.yml']
+    paths: ['.github/workflows/sbv-fire-ants-source.yml', 'sbv_fire_ants/fetch_dryad.py']
 permissions:
   contents: read
 jobs:
