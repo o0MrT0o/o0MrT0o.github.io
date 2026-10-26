@@ -1,0 +1,42 @@
+{
+  "run_id": "40372340004",
+  "master_exists": true,
+  "size_bytes": 178239845,
+  "qa": {
+    "status": "PASS",
+    "file": "SBV_ZOMBIE_ANT_V4_CINEMATIC_NATURE_FINAL.mp4",
+    "duration_seconds": 244.87,
+    "file_bytes": 178239845,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_sources": 20,
+    "reused_video_sources": 0,
+    "still_images": 0,
+    "source": "original QA-passed video V3; no scene reordered, repeated or extended",
+    "cinematic_intro": {
+      "title_start": 19.785,
+      "title_end": 24.185,
+      "animated_real_footage": true,
+      "title_motion_unique_frame_hashes": 58,
+      "music_rms_dbfs": -22.63
+    },
+    "sound_design": {
+      "real_recorded_nature_sounds": [
+        "forest",
+        "birds",
+        "crickets",
+        "wind"
+      ],
+      "music": [
+        "score1",
+        "score2"
+      ],
+      "synthetic_nature_imitation": false,
+      "music_sidechain_ducking": true,
+      "nature_stereo_mix": true
+    },
+    "voice": "original Kokoro-82M v1.0 af_heart WAV unchanged with verified chapter pauses",
+    "decoder_test": "PASS",
+    "subtitles": "original V3 SRT remains valid because video timeline has not been shifted"
+  }
+}
