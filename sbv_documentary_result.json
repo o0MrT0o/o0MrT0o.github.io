@@ -1,0 +1,25 @@
+{
+  "run_id": "40309917775",
+  "mp4_created": true,
+  "mp4_size": 173845871,
+  "unique_source_qa": {
+    "status": "PASS",
+    "file": "SBV_ZOMBIE_ANT_DOCUMENTARY_NO_REPEATS_MASTER.mp4",
+    "duration_sec": 227.2,
+    "size_bytes": 173845871,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_source_files": 20,
+    "used_source_files": 20,
+    "source_clip_repeat_count": 0,
+    "source_time_overlap_count": 0,
+    "visuals": "100% authentic moving video files, no still image, no generated footage",
+    "narration": "Kokoro-82M v1.0, af_heart speed 0.88, original wave reused",
+    "subtitles": "separate SRT, optional - no permanent YouTube-style captions",
+    "music": "John Bartmann dark-highway-master CC0 1.0 (no loop)",
+    "ambience": "nille forest natural field recording public domain (no loop)",
+    "machine_full_decode": "PASS",
+    "audio_codec": "AAC",
+    "video_codec": "H264"
+  }
+}
