@@ -314,15 +314,15 @@ music_dur1=124.5;music_dur2=125.0;music_crossfade=4.5
 assert music_dur1+music_dur2-music_crossfade>=duration
 # Forest 123.4 and birds 209 sec: 119.5s+130s - 4.0 = 245.5 sec.
 aud_filter=(
- "[1:a]aresample=48000,atrim=0:124.5,asetpts=PTS-STARTPTS[ms1];"
- "[2:a]aresample=48000,atrim=0:125,asetpts=PTS-STARTPTS[ms2];"
+ "[2:a]aresample=48000,atrim=0:124.5,asetpts=PTS-STARTPTS[ms1];"
+ "[3:a]aresample=48000,atrim=0:125,asetpts=PTS-STARTPTS[ms2];"
  "[ms1][ms2]acrossfade=d=4.5:c1=tri:c2=tri,loudnorm=I=-20:TP=-3:LRA=9[score];"
- "[3:a]aresample=48000,atrim=0:119.5,asetpts=PTS-STARTPTS[amb1];"
- "[4:a]aresample=48000,atrim=0:130,asetpts=PTS-STARTPTS[amb2];"
+ "[4:a]aresample=48000,atrim=0:119.5,asetpts=PTS-STARTPTS[amb1];"
+ "[5:a]aresample=48000,atrim=0:130,asetpts=PTS-STARTPTS[amb2];"
  "[amb1][amb2]acrossfade=d=4:c1=tri:c2=tri,loudnorm=I=-28:TP=-7:LRA=8[forest];"
- "[0:a]aresample=48000,volume=1[voice];"
- "[score][voice]sidechaincompress=threshold=0.028:ratio=5:attack=60:release=500[scoreduck];"
- "[voice][scoreduck][forest]amix=inputs=3:duration=first:normalize=0,"
+ "[1:a]aresample=48000,volume=1,asplit=2[voice_for_compressor][voice_output];"
+ "[score][voice_for_compressor]sidechaincompress=threshold=0.028:ratio=5:attack=60:release=500[scoreduck];"
+ "[voice_output][scoreduck][forest]amix=inputs=3:duration=first:normalize=0,"
  "alimiter=limit=0.9,loudnorm=I=-15:TP=-1.5:LRA=9[final]"
 )
 master=OUT/"SBV_ZOMBIE_ANT_PITALA_STYLE_CHAPTERS_NO_REPEAT_FINAL.mp4"
