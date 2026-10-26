@@ -279,13 +279,20 @@ for name,(urls,lic) in AUDIO.items():
     if name not in resolved_audio:
         if name.startswith("score"):
             raise RuntimeError("Music is mandatory. No rights-cleared soundtrack source was reachable: "+name)
-        if name=="forest_intro":
-            raise RuntimeError("Real forest ambience failed: "+name)
-        else:
-            # If secondary birds fail, use genuine forest recording only once, without looping.
-            # The second part is supported by the (mandatory) music, not fake nature effects.
-            resolved_audio[name]=(None,lic,0)
-            print("Secondary field sound unavailable, fallback is music only",flush=True)
+        # Missing field recordings never block the two actual CC0 compositions.
+        # Supply a clean, deterministic, self-composed atmospheric bed instead.
+        # Do not claim it is a real wildlife field recording.
+        frequency = "640" if name=="forest_intro" else "340"
+        color = "pink" if name=="forest_intro" else "brown"
+        shell(["ffmpeg","-hide_banner","-loglevel","error","-y",
+          "-f","lavfi","-i",f"anoisesrc=color={color}:amplitude=0.045:sample_rate=48000",
+          "-t","132","-af",f"lowpass=f={frequency},highpass=f=45",
+          "-c:a","pcm_s16le",str(dest)],True)
+        resolved_audio[name]=(
+          "self-composed synthetic atmospheric soundscape (NOT field recording)",
+          "original sound design, generated procedural audio",132)
+        print("ORIGINAL AMBIENCE FALLBACK",name,flush=True)
+
 # Adapt mix to the actual duration of the second nature recording.
 if resolved_audio["birds_late"][0] is None:
     # Produce a 130-second original quiet low ambient texture, NOT represented as a real field recording.
@@ -300,7 +307,7 @@ if resolved_audio["birds_late"][0] is None:
                                     "original synthesized soundscape / no external copyright claim",132)
     print("GENTLE ORIGINAL SOUNDSCAPE GENERATED",flush=True)
 
-print("FOUR DISTINCT SOUND SOURCES VERIFIED",flush=True)
+print("FOUR NONLOOPED SOUND SOURCES READY; field recordings identified vs generated",flush=True)
 # 124.5s + 125.0s - 4.5s crossfade = 245.0 seconds (enough for master).
 # Preserve music in the final seconds and prevent undesired abrupt loss.
 music_dur1=124.5;music_dur2=125.0;music_crossfade=4.5
@@ -365,7 +372,7 @@ qa={"file":master.name,"status":"PASS","full_decode":"PASS",
     "chapter_interludes_s":[4.4,2.8,2.8,4.9,4.9,2.8],
     "intentional_silence_before_each_later_chapter":True,
     "music":"2 different CC0 dark-ambient compositions with scene-shift crossfade and ducking",
-    "nature_sound":"2 independent public-domain / CC0 recordings (no loop)",
+    "nature_sound":{name:{"source":row[0],"license":row[1]} for name,row in resolved_audio.items() if not name.startswith("score")},
     "music_audible_break_rms_dbfs":round(dbfs,2),
     "subtitles":"Separate optional SRT; no permanent giant captions",
     "mp4_codec":"H264 + AAC"}
