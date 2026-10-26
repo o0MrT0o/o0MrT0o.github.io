@@ -1,0 +1,95 @@
+name: SBV Zombie Ant V4 - cinematic title and real forest soundscape
+on:
+  push:
+    branches:
+      - sbv-zombie-ant-cinematic-v4-sound-title
+    paths-ignore:
+      - sbv_v4_verified_result.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout isolated video production branch
+        uses: actions/checkout@v4
+      - name: Prepare verified tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          python3 -m py_compile sbv_cinematic_v4_remix.py
+      - name: Fetch previous QA-approved zero-repeat video and original Kokoro narration
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p v3_source output
+          gh run download 40361665629 -n SBV_ZOMBIE_ANT_PITALA_STYLE_V3_FINAL_1080P -D v3_source --repo "${{ github.repository }}"
+          gh run download 40303439642 -n SBV_ZOMBIE_ANT_KOKORO_AF_HEART_AUDIO -D output --repo "${{ github.repository }}"
+          test -s v3_source/SBV_ZOMBIE_ANT_PITALA_STYLE_CHAPTERS_NO_REPEAT_FINAL.mp4
+          test -s v3_source/NO_REPEAT_EDL.json
+          test -s v3_source/VERIFIED_CHAPTER_AUDIO_TIMINGS.json
+          test -s v3_source/QA_REVISED_MASTER.json
+          test -s output/00_COLD_OPEN.wav
+      - name: Remix real nature sounds music and cinematic full frame title
+        run: |
+          set -euo pipefail
+          python3 sbv_cinematic_v4_remix.py
+      - name: Create cinematic title and chapter preview frames
+        run: |
+          set -euo pipefail
+          mkdir -p v4_output/previews
+          ffmpeg -v error -y -ss 1.5 -i v4_output/SBV_ZOMBIE_ANT_V4_CINEMATIC_NATURE_FINAL.mp4 -frames:v 1 v4_output/previews/opening_001.jpg
+          python3 - <<'PY'
+          import subprocess,json,pathlib
+          t=json.loads(pathlib.Path("v3_source/VERIFIED_CHAPTER_AUDIO_TIMINGS.json").read_text())
+          file="v4_output/SBV_ZOMBIE_ANT_V4_CINEMATIC_NATURE_FINAL.mp4"
+          for i,item in enumerate(t[1:],1):
+              at=float(item["pause_start"])+float(item["gap_sec"])/2
+              subprocess.run(["ffmpeg","-v","error","-y","-ss",str(at),"-i",file,"-frames:v","1",f"v4_output/previews/chapter_{i:02}.jpg"],check=True)
+          PY
+      - name: Save verified documentary and QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_ZOMBIE_ANT_V4_CINEMATIC_NATURE_1080P
+          path: |
+            v4_output/SBV_ZOMBIE_ANT_V4_CINEMATIC_NATURE_FINAL.mp4
+            v4_output/SUBTITLES_EN.srt
+            v4_output/QA_V4.json
+            v4_output/AUDIO_LICENSES.json
+            v4_output/CREDITS_AND_SOURCES.txt
+            v4_output/NO_REPEAT_EDL.json
+            v4_output/VERIFIED_CHAPTER_AUDIO_TIMINGS.json
+            v4_output/previews/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish direct MP4 download at GitHub Release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create sbv-zombie-ant-cinematic-v4-20261026             v4_output/SBV_ZOMBIE_ANT_V4_CINEMATIC_NATURE_FINAL.mp4             --repo "${{ github.repository }}"             --target "${{ github.sha }}"             --title "Strange, But Verified — Zombie Ant Documentary V4"             --notes "Cinematic nature documentary V4. Original Kokoro af_heart voice; 20 unique authentic video sources, zero repeat clips, refined moving-footage title, CC0 forest/bird/cricket audio and documentary score. Video is public for download via this GitHub release; not posted to YouTube."
+      - name: Save accurate build status
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path("v4_output/SBV_ZOMBIE_ANT_V4_CINEMATIC_NATURE_FINAL.mp4")
+          q=Path("v4_output/QA_V4.json")
+          res={"run_id":os.getenv("GITHUB_RUN_ID",""),"master_exists":p.is_file(),"size_bytes":p.stat().st_size if p.is_file() else 0,"qa":json.loads(q.read_text()) if q.is_file() else None}
+          Path("sbv_v4_verified_result.json").write_text(json.dumps(res,indent=2))
+          print(json.dumps(res,indent=2))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sbv_v4_verified_result.json
+          git commit -m "Record cinematic documentary V4 verified result" || true
+          git push origin HEAD:sbv-zombie-ant-cinematic-v4-sound-title
