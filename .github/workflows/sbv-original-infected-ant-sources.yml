@@ -1,0 +1,82 @@
+name: SBV - Recover original Ophiocordyceps research movies
+on:
+  push:
+    branches: [sbv-zombie-ant-original-research-footage-20261026]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  transcode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout isolated research assets branch
+        uses: actions/checkout@v4
+      - name: Prepare FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+      - name: Download two authentic infected ants on research publisher server
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p original research_mp4
+          base='https://media.springernature.com/original/springer-static/esm/art%3A10.1186%2Fs12862-014-0166-3/MediaObjects'
+          curl --fail --location --retry 4 --retry-delay 3 --connect-timeout 25 --max-time 150 -A 'Mozilla/5.0 SBV nature research verification' "${base}/12862_2014_166_MOESM2_ESM.mov" -o original/12862_2014_166_MOESM2_ESM.mov
+          curl --fail --location --retry 4 --retry-delay 3 --connect-timeout 25 --max-time 150 -A 'Mozilla/5.0 SBV nature research verification' "${base}/12862_2014_166_MOESM3_ESM.mov" -o original/12862_2014_166_MOESM3_ESM.mov
+          for f in original/*.mov; do
+            test -s "$f"
+            ffprobe -v error -show_entries format=duration:stream=codec_type,width,height -of default=noprint_wrappers=1 "$f"
+          done
+      - name: Preserve each unique source in separate upload-ready MP4
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -loglevel error -y -i original/12862_2014_166_MOESM2_ESM.mov -map 0:v:0 -an -c:v libx264 -crf 18 -preset medium -pix_fmt yuv420p -movflags +faststart research_mp4/REAL_OPHIOCORDYCEPS_INFECTED_C_CASTANEUS_DEATH_GRIP.mp4
+          ffmpeg -hide_banner -loglevel error -y -i original/12862_2014_166_MOESM3_ESM.mov -map 0:v:0 -an -c:v libx264 -crf 18 -preset medium -pix_fmt yuv420p -movflags +faststart research_mp4/REAL_OPHIOCORDYCEPS_INFECTED_C_AMERICANUS_DEATH_GRIP.mp4
+          for file in research_mp4/*.mp4; do
+            ffmpeg -hide_banner -loglevel error -xerror -i "$file" -f null -
+          done
+          sha256sum research_mp4/*.mp4 > research_mp4/SHA256SUMS.txt
+          cat > research_mp4/SOURCES_AND_LICENSE.txt <<'EOF'
+          ORIGINAL SCIENTIFIC VIDEO FOOTAGE -- GENUINE OPHIOCORDYCEPS-INFECTED ANTS
+          de Bekker C, Quevillon LE, Smith PB, et al. (2014).
+          Species-specific ant brain manipulation by a specialized fungal parasite.
+          BMC Evolutionary Biology 14, 166. DOI 10.1186/s12862-014-0166-3
+          Article and supplementary original research videos: CC BY 4.0.
+          https://creativecommons.org/licenses/by/4.0/
+          https://link.springer.com/article/10.1186/s12862-014-0166-3
+
+          Clip 1 -- de Bekker et al. Additional File 2:
+          REAL_OPHIOCORDYCEPS_INFECTED_C_CASTANEUS_DEATH_GRIP.mp4
+          Original: 12862_2014_166_MOESM2_ESM.mov
+          GENUINE video of fungus-induced mandibular biting in Camponotus castaneus in lab.
+          Publisher: https://media.springernature.com/original/springer-static/esm/art%3A10.1186%2Fs12862-014-0166-3/MediaObjects/12862_2014_166_MOESM2_ESM.mov
+
+          Clip 2 -- de Bekker et al. Additional File 3:
+          REAL_OPHIOCORDYCEPS_INFECTED_C_AMERICANUS_DEATH_GRIP.mp4
+          Original: 12862_2014_166_MOESM3_ESM.mov
+          GENUINE video of fungus-induced mandibular biting in Camponotus americanus in lab.
+          Publisher: https://media.springernature.com/original/springer-static/esm/art%3A10.1186%2Fs12862-014-0166-3/MediaObjects/12862_2014_166_MOESM3_ESM.mov
+
+          Video was converted MOV -> H.264 MP4, original moving pictures and aspect ratio preserved.
+          NO new images, no color grading, no generative footage, no artificial stretching, no loops, no music added.
+          If republishing on YouTube, cite authors, DOI, license and conversion; use outside research context only with factual caption (laboratory infection).
+          EOF
+          ffprobe -v error -show_entries format=duration,size -of json research_mp4/*.mp4 || true
+      - name: Publish both actual footage MP4 files
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_NEW_REAL_OPHIOCORDYCEPS_RESEARCH_FOOTAGE
+          path: research_mp4/
+          retention-days: 7
+      - name: Create direct download links to real footage
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create sbv-ophiocordyceps-original-lab-footage-20261026 research_mp4/*.mp4 research_mp4/SOURCES_AND_LICENSE.txt research_mp4/SHA256SUMS.txt \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" \
+            --title "SBV: Original Ophiocordyceps laboratory research footage (de Bekker 2014)" \
+            --notes "Two independently recorded, authentic infected-ant behavior footage clips from de Bekker et al. (2014), CC BY 4.0, converted from original publisher MOV to MP4 without changing aspect ratio. Please preserve scientific attribution and lab-study context."
