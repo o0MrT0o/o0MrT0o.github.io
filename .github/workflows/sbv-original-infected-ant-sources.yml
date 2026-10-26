@@ -16,8 +16,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Prepare FFmpeg
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y ffmpeg
+          command -v ffmpeg || { echo "FFmpeg missing"; exit 1; }
+          ffmpeg -version | head -1
       - name: Download two authentic infected ants on research publisher server
         shell: bash
         run: |
