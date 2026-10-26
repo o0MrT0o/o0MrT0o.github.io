@@ -86,11 +86,21 @@ s1_frame=int(round(start_1*F));s2_frame=int(round(start_2*F))
 tag="GENUINE LABORATORY FOOTAGE  /  DE BEKKER ET AL. 2014"
 # Original V4 video is split into unaffected segments, pixel-by-pixel and
 # in order. All its segments are disjoint in time: no replay.
-parts=[
- "[0:v]split=3[base0][base1][base2]",
- f"[base0]trim=start_frame=0:end_frame={A0},setpts=PTS-STARTPTS[p0]",
- f"[base1]trim=start_frame={A1}:end_frame={B0},setpts=PTS-STARTPTS[p1]",
- f"[base2]trim=start_frame={B1}:end_frame={END},setpts=PTS-STARTPTS[p2]",
+adjacent=(B0==A1)
+if adjacent:
+    parts=[
+      "[0:v]split=2[base0][base2]",
+      f"[base0]trim=start_frame=0:end_frame={A0},setpts=PTS-STARTPTS[p0]",
+      f"[base2]trim=start_frame={B1}:end_frame={END},setpts=PTS-STARTPTS[p2]",
+    ]
+else:
+    parts=[
+      "[0:v]split=3[base0][base1][base2]",
+      f"[base0]trim=start_frame=0:end_frame={A0},setpts=PTS-STARTPTS[p0]",
+      f"[base1]trim=start_frame={A1}:end_frame={B0},setpts=PTS-STARTPTS[p1]",
+      f"[base2]trim=start_frame={B1}:end_frame={END},setpts=PTS-STARTPTS[p2]",
+    ]
+parts += [
  f"[1:v]fps=30,trim=start_frame={s1_frame}:end_frame={s1_frame+R1},setpts=PTS-STARTPTS,"
  "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,setsar=1,format=yuv420p,"
  f"drawtext=fontfile={FONT}:text='{tag}':fontsize=19:"
@@ -106,9 +116,11 @@ parts=[
  f"drawtext=fontfile={FONT}:text='{tag}':fontsize=19:"
  "fontcolor=white@0.92:bordercolor=black@0.72:borderw=2:x=45:y=38:"
  "enable='between(t,0,2.3)'[science2]",
- "[p0][science1][p1][science2][p2]concat=n=5:v=1:a=0,"
- "format=yuv420p[outvideo]"
 ]
+parts.append(
+ ("[p0][science1][science2][p2]concat=n=4:v=1:a=0," if adjacent else
+  "[p0][science1][p1][science2][p2]concat=n=5:v=1:a=0,")
+ + "format=yuv420p[outvideo]")
 ff=[
  "ffmpeg","-hide_banner","-loglevel","error","-y","-i",str(OLD),
  "-i",str(NEW1),"-i",str(NEW2),"-filter_complex",";".join(parts),
