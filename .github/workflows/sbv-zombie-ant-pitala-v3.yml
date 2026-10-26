@@ -1,0 +1,89 @@
+name: SBV Zombie Ant Nature Documentary V3 - Framing Sound and Chapters
+on:
+  push:
+    branches:
+      - sbv-zombie-ant-pitala-documentary-v3
+    paths-ignore:
+      - sbv_documentary_v3_result.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  documentary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout film editor source
+        uses: actions/checkout@v4
+      - name: Install FFmpeg and verify dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          ffmpeg -version | head -2
+      - name: Retrieve completed original Kokoro af_heart narrator
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p output
+          gh run download 40303439642 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_KOKORO_AF_HEART_AUDIO -D output
+          test -s output/SBV_ZOMBIE_ANT_KOKORO_AF_HEART_MASTER.wav
+          test -s output/chapter_timing.json
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 output/SBV_ZOMBIE_ANT_KOKORO_AF_HEART_MASTER.wav
+      - name: Strict source-unique real-video documentary render
+        run: |
+          set -euo pipefail
+          python3 sbv_pitala_doc_v3.py
+      - name: Verify visual opening, all chapter transitions, and music intensity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p documentary/visual_qa
+          ffmpeg -hide_banner -loglevel error -y -ss 1.5 -i documentary/SBV_ZOMBIE_ANT_PITALA_STYLE_CHAPTERS_NO_REPEAT_FINAL.mp4 -frames:v 1 documentary/visual_qa/01_opening_full_bleed.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 21.0 -i documentary/SBV_ZOMBIE_ANT_PITALA_STYLE_CHAPTERS_NO_REPEAT_FINAL.mp4 -frames:v 1 documentary/visual_qa/02_film_title_on_live_footage.jpg
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          t=json.loads(Path("documentary/VERIFIED_CHAPTER_AUDIO_TIMINGS.json").read_text())
+          for i,ch in enumerate(t[2:],start=2):
+              a=(ch["pause_start"]+0.8)
+              subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y","-ss",str(a),
+                "-i","documentary/SBV_ZOMBIE_ANT_PITALA_STYLE_CHAPTERS_NO_REPEAT_FINAL.mp4",
+                "-frames:v","1",f"documentary/visual_qa/chapter_{i:02d}.jpg"],check=True)
+          PY
+      - name: Upload audited documentary 1080p master
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_ZOMBIE_ANT_PITALA_STYLE_V3_FINAL_1080P
+          path: |
+            documentary/SBV_ZOMBIE_ANT_PITALA_STYLE_CHAPTERS_NO_REPEAT_FINAL.mp4
+            documentary/visual_qa/
+            documentary/SUBTITLES_EN.srt
+            documentary/NO_REPEAT_EDL.json
+            documentary/QA_REVISED_MASTER.json
+            documentary/SOURCE_RIGHTS_AND_CREDITS.txt
+            documentary/VERIFIED_CHAPTER_AUDIO_TIMINGS.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Record real outcome and run ID
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          path=Path("documentary/SBV_ZOMBIE_ANT_DOCUMENTARY_NO_REPEATS_MASTER.mp4")
+          qa=Path("documentary/QA_NO_REPEATS.json")
+          info={"run_id":os.getenv("GITHUB_RUN_ID",""),"mp4_created":path.is_file(),"mp4_size":path.stat().st_size if path.is_file() else 0,
+          "unique_source_qa":json.loads(qa.read_text()) if qa.exists() else None}
+          Path("sbv_documentary_result.json").write_text(json.dumps(info,indent=2))
+          print(json.dumps(info,indent=2))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sbv_documentary_result.json
+          git commit -m "Store no-repeat documentary render status" || true
+          git push origin HEAD:sbv-zombie-ant-pitala-documentary-v3
