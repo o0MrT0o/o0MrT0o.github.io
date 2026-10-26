@@ -1,0 +1,92 @@
+name: SBV Zombie Ant V5 — More Real Research Footage
+on:
+  push:
+    branches: [sbv-zombie-ant-v5-more-science]
+    paths-ignore:
+      - sbv_v5_result.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out isolated version 5 editing branch
+        uses: actions/checkout@v4
+      - name: Set up video processing without apt repositories
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q imageio-ffmpeg
+          python3 - <<'PY'
+          import imageio_ffmpeg,os
+          from pathlib import Path
+          exe=Path(imageio_ffmpeg.get_ffmpeg_exe())
+          d=Path("portable_bin").resolve()
+          d.mkdir(exist_ok=True)
+          (d/"ffmpeg").symlink_to(exe.resolve())
+          with open(os.environ["GITHUB_PATH"],"a") as p:p.write(str(d)+"\n")
+          print("ffmpeg:",str(exe))
+          PY
+          python3 -m py_compile sbv_v5_insert_real_ants.py
+      - name: Retrieve V4 master and unchanged original music and Kokoro
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p v4_input v3_reference new_science
+          gh run download 40372340004 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_V4_CINEMATIC_NATURE_1080P -D v4_input
+          gh run download 40361665629 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_PITALA_STYLE_V3_FINAL_1080P -D v3_reference
+          gh release download sbv-ophiocordyceps-original-lab-footage-20261026 --repo "${{ github.repository }}" --pattern '*.mp4' -D new_science
+          test -s v4_input/SBV_ZOMBIE_ANT_V4_CINEMATIC_NATURE_FINAL.mp4
+          test -s v3_reference/NO_REPEAT_EDL.json
+          test -s new_science/REAL_OPHIOCORDYCEPS_INFECTED_C_CASTANEUS_DEATH_GRIP.mp4
+          test -s new_science/REAL_OPHIOCORDYCEPS_INFECTED_C_AMERICANUS_DEATH_GRIP.mp4
+      - name: Replace ordinary ant stock with two real infected species and verify no reused shots
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 sbv_v5_insert_real_ants.py
+      - name: Upload final MP4 with auditable source manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_ZOMBIE_ANT_V5_REAL_SCIENTIFIC_FOOTAGE_FINAL
+          path: v5_output/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Create direct MP4 download release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create sbv-zombie-ant-v5-real-research-20261026 \
+            v5_output/SBV_ZOMBIE_ANT_V5_REAL_ZOMBIE_ANTS_NO_REPEATS.mp4 \
+            v5_output/CREDITS_AND_SCIENTIFIC_SOURCES.txt \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "Strange, But Verified — Zombie Ant Documentary V5 (more real science footage)" \
+            --notes "Replaces two normal-ant stock clips with genuine laboratory footage of Ophiocordyceps-infected Camponotus castaneus and C. americanus, from de Bekker et al. 2014, BMC Evol. Biol. CC BY 4.0. V4 Kokoro af_heart narration, natural ambience, soundtrack, title and chapter pauses preserved bit-exact in AAC stream; all original footage used at most once. YouTube remains unmodified."
+      - name: Record accurate outcome
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path("v5_output/SBV_ZOMBIE_ANT_V5_REAL_ZOMBIE_ANTS_NO_REPEATS.mp4")
+          q=Path("v5_output/QA_V5_MORE_REAL_FOOTAGE.json")
+          r={"run_id":os.getenv("GITHUB_RUN_ID",""),"master_exists":p.is_file(),"size_bytes":p.stat().st_size if p.is_file() else 0,"qa":json.loads(q.read_text()) if q.is_file() else None}
+          Path("sbv_v5_result.json").write_text(json.dumps(r,indent=2))
+          print(json.dumps(r,indent=2))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sbv_v5_result.json
+          git commit -m "Record real Zombie Ant research footage incorporation and QA" || true
+          git push origin HEAD:sbv-zombie-ant-v5-more-science
