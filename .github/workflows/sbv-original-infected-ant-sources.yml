@@ -14,10 +14,20 @@ jobs:
     steps:
       - name: Checkout isolated research assets branch
         uses: actions/checkout@v4
-      - name: Prepare FFmpeg
+      - name: Install portable FFmpeg without system package-manager network
         run: |
-          command -v ffmpeg || { echo "FFmpeg missing"; exit 1; }
-          ffmpeg -version | head -1
+          python3 -m pip install --disable-pip-version-check -q imageio-ffmpeg
+          python3 - <<'PY'
+          import imageio_ffmpeg
+          from pathlib import Path
+          import os
+          exe=Path(imageio_ffmpeg.get_ffmpeg_exe())
+          Path("portable_bin").mkdir(exist_ok=True)
+          os.symlink(exe.resolve(),Path("portable_bin/ffmpeg"))
+          with open(os.environ["GITHUB_PATH"],"a") as f:
+            f.write(str(Path("portable_bin").resolve())+"\n")
+          print("Portable FFmpeg:",exe)
+          PY
       - name: Download two authentic infected ants on research publisher server
         shell: bash
         run: |
@@ -28,7 +38,7 @@ jobs:
           curl --fail --location --retry 4 --retry-delay 3 --connect-timeout 25 --max-time 150 -A 'Mozilla/5.0 SBV nature research verification' "${base}/12862_2014_166_MOESM3_ESM.mov" -o original/12862_2014_166_MOESM3_ESM.mov
           for f in original/*.mov; do
             test -s "$f"
-            ffprobe -v error -show_entries format=duration:stream=codec_type,width,height -of default=noprint_wrappers=1 "$f"
+            ffmpeg -hide_banner -v error -xerror -i "$f" -f null -
           done
       - name: Preserve each unique source in separate upload-ready MP4
         shell: bash
@@ -65,7 +75,7 @@ jobs:
           NO new images, no color grading, no generative footage, no artificial stretching, no loops, no music added.
           If republishing on YouTube, cite authors, DOI, license and conversion; use outside research context only with factual caption (laboratory infection).
           EOF
-          ffprobe -v error -show_entries format=duration,size -of json research_mp4/*.mp4 || true
+          ls -lh research_mp4/*.mp4
       - name: Publish both actual footage MP4 files
         uses: actions/upload-artifact@v4
         with:
