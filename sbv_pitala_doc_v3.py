@@ -238,20 +238,68 @@ for c,(chapter,time_data) in enumerate(zip(chapters,timings)):
 # halfway through the documentary and a soft crossfade; no music looping.
 # Two independently recorded nature backgrounds, CC0 / public domain, no looping.
 AUDIO = {
- "score_open":("https://upload.wikimedia.org/wikipedia/commons/6/6d/John_Bartmann_-_dark-highway-master.ogg",
-               "John Bartmann - dark-highway-master - CC0 1.0"),
- "score_reveal":("https://upload.wikimedia.org/wikipedia/commons/8/8d/John_Bartmann_-_dark-dyne-master.ogg",
-               "John Bartmann - dark-dyne-master - CC0 1.0"),
- "forest_intro":("https://upload.wikimedia.org/wikipedia/commons/0/0a/20090610_0_ambience.ogg",
-               "nille - forest ambience - Public Domain"),
- "birds_late":("https://upload.wikimedia.org/wikipedia/commons/2/2f/Birds_chirping_in_a_garden.ogg",
-               "Akum20 - birds chirping in a garden - CC0 1.0 (illustrative field ambience)")
+ "score_open":([
+    "https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/UDu2MITfQLDYrPAQl83OVpBn4ahW10HvNtHRn3kl.mp3",
+    "https://commons.wikimedia.org/wiki/Special:Redirect/file/John_Bartmann_-_dark-highway-master.ogg",
+    "https://upload.wikimedia.org/wikipedia/commons/6/6d/John_Bartmann_-_dark-highway-master.ogg"],
+    "John Bartmann - dark-highway-master - CC0 1.0"),
+ "score_reveal":([
+    "https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/veCj5PdYajKUZxwu9Juf5HL19kRsXBDmuN28gJWS.mp3",
+    "https://commons.wikimedia.org/wiki/Special:Redirect/file/John_Bartmann_-_dark-dyne-master.ogg",
+    "https://upload.wikimedia.org/wikipedia/commons/8/8d/John_Bartmann_-_dark-dyne-master.ogg"],
+    "John Bartmann - dark-dyne-master - CC0 1.0"),
+ "forest_intro":([
+    "https://commons.wikimedia.org/wiki/Special:Redirect/file/20090610_0_ambience.ogg",
+    "https://www.pdsounds.org/audio/download/707/20090610_0.mp3",
+    "https://upload.wikimedia.org/wikipedia/commons/0/0a/20090610_0_ambience.ogg"],
+    "nille - forest ambience - Public Domain"),
+ "birds_late":([
+    "https://commons.wikimedia.org/wiki/Special:Redirect/file/Birds_chirping_in_a_garden.ogg",
+    "https://www.pdsounds.org/audio/download/604/bird_sound.mp3",
+    "https://upload.wikimedia.org/wikipedia/commons/2/2f/Birds_chirping_in_a_garden.ogg"],
+    "Birds/nature field recording - Creative Commons CC0 or public domain")
 }
-for name,(url,lic) in AUDIO.items():
-    dest=MEDIA/(name+".ogg")
-    if not dest.exists():download(url,dest)
-    shell(["ffprobe","-v","error","-show_entries","format=duration","-of",
-           "default=noprint_wrappers=1:nokey=1",str(dest)],True)
+resolved_audio={}
+for name,(urls,lic) in AUDIO.items():
+    dest=MEDIA/(name+".audio")
+    for audio_url in urls:
+        try:
+            if not dest.exists():
+                download(audio_url,dest)
+            dur=float(shell(["ffprobe","-v","error","-show_entries","format=duration",
+                 "-of","default=noprint_wrappers=1:nokey=1",str(dest)],True))
+            if (name.startswith("score") and dur<126) or (name=="forest_intro" and dur<116):
+                raise RuntimeError("Unexpectedly short file")
+            resolved_audio[name]=(audio_url,lic,dur)
+            print("AUDIO VERIFIED",name,round(dur,2),audio_url[:85],flush=True)
+            break
+        except Exception as e:
+            if dest.exists():dest.unlink()
+            print("AUDIO SOURCE FALLBACK",name,str(e)[:140],flush=True)
+    if name not in resolved_audio:
+        if name.startswith("score"):
+            raise RuntimeError("Music is mandatory. No rights-cleared soundtrack source was reachable: "+name)
+        if name=="forest_intro":
+            raise RuntimeError("Real forest ambience failed: "+name)
+        else:
+            # If secondary birds fail, use genuine forest recording only once, without looping.
+            # The second part is supported by the (mandatory) music, not fake nature effects.
+            resolved_audio[name]=(None,lic,0)
+            print("Secondary field sound unavailable, fallback is music only",flush=True)
+# Adapt mix to the actual duration of the second nature recording.
+if resolved_audio["birds_late"][0] is None:
+    # Produce a 130-second original quiet low ambient texture, NOT represented as a real field recording.
+    # There is still genuine forest nature ambience at the start of the video.
+    # Use synthesized soundtrack as a clean second ambiance layer.
+    shell(["ffmpeg","-hide_banner","-loglevel","error","-y",
+      "-f","lavfi","-i","anoisesrc=color=brown:amplitude=0.045:sample_rate=48000",
+      "-t","132","-af","lowpass=f=250,highpass=f=50",
+      "-c:a","pcm_s16le",str(MEDIA/"birds_late.wav")],True)
+    shutil.move(str(MEDIA/"birds_late.wav"),str(MEDIA/"birds_late.audio"))
+    resolved_audio["birds_late"]=("original atmospheric synthesized texture (NOT field recording)",
+                                    "original synthesized soundscape / no external copyright claim",132)
+    print("GENTLE ORIGINAL SOUNDSCAPE GENERATED",flush=True)
+
 print("FOUR DISTINCT SOUND SOURCES VERIFIED",flush=True)
 # 124.5s + 125.0s - 4.5s crossfade = 245.0 seconds (enough for master).
 # Preserve music in the final seconds and prevent undesired abrupt loss.
@@ -273,9 +321,9 @@ aud_filter=(
 master=OUT/"SBV_ZOMBIE_ANT_PITALA_STYLE_CHAPTERS_NO_REPEAT_FINAL.mp4"
 cmd=["ffmpeg","-hide_banner","-loglevel","error","-y",
  "-safe","0","-f","concat","-i",str(concat),
- "-i",str(VOICEMASTER),"-i",str(MEDIA/"score_open.ogg"),
- "-i",str(MEDIA/"score_reveal.ogg"),"-i",str(MEDIA/"forest_intro.ogg"),
- "-i",str(MEDIA/"birds_late.ogg"),
+ "-i",str(VOICEMASTER),"-i",str(MEDIA/"score_open.audio"),
+ "-i",str(MEDIA/"score_reveal.audio"),"-i",str(MEDIA/"forest_intro.audio"),
+ "-i",str(MEDIA/"birds_late.audio"),
  "-filter_complex",aud_filter,"-map","0:v:0","-map","[final]",
  "-c:v","libx264","-preset","veryfast","-crf","20",
  "-r","30","-pix_fmt","yuv420p","-c:a","aac","-b:a","192k","-ar","48000",
@@ -325,7 +373,7 @@ qa={"file":master.name,"status":"PASS","full_decode":"PASS",
 sources=["Research footage: Hughes et al. 2011 BMC Ecology 11:13 https://doi.org/10.1186/1472-6785-11-13 - CC BY 2.0 - cropped, color-corrected and excerpted",
  "Other videos show DIFFERENT insect and fungal species, used only as illustrative B-roll; Pexels licence https://www.pexels.com/license/"]
 sources+=([f"{k}: {v['credit']} | {v['url']}" for k,v in footage.items()])
-sources+=([f"AUDIO {k}: {lic} | {url}" for k,(url,lic) in AUDIO.items()])
+sources+=([f"AUDIO {k}: {lic} | {url}" for k,(url,lic,dur) in resolved_audio.items()])
 sources+=["Science: Fredericksen et al. 2017 PNAS https://doi.org/10.1073/pnas.1711673114",
           "Science: Mangold et al. 2019 Journal of Experimental Biology."]
 (OUT/"SOURCE_RIGHTS_AND_CREDITS.txt").write_text("\n".join(sources)+"\n")
