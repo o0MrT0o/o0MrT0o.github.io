@@ -1,6 +1,47 @@
 {
-  "run_id": "40382870739",
-  "master_exists": false,
-  "size_bytes": 0,
-  "qa": null
+  "run_id": "40383182514",
+  "master_exists": true,
+  "size_bytes": 159296377,
+  "qa": {
+    "status": "PASS",
+    "file": "SBV_ZOMBIE_ANT_V5_REAL_ZOMBIE_ANTS_NO_REPEATS.mp4",
+    "duration_seconds": 244.87,
+    "size_bytes": 159296377,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "genuine_infected_ant_sources": 3,
+    "new_authentic_zombie_ant_sources": 2,
+    "no_repeat_original_source_count": 20,
+    "repeated_source_count": 0,
+    "still_images": 0,
+    "added_science": [
+      {
+        "source": "de Bekker 2014 Camponotus castaneus",
+        "source_original_length_s": 20.02,
+        "used_duration_s": 15.0,
+        "timeline_at_s": 98.23333333333333
+      },
+      {
+        "source": "de Bekker 2014 Camponotus americanus",
+        "source_original_length_s": 64.33,
+        "used_duration_s": 14.567,
+        "timeline_at_s": 113.23333333333333,
+        "portrait_proportions_preserved": true
+      }
+    ],
+    "audio": {
+      "unchanged_bit_exact": true,
+      "source_stream_sha256": "SHA256=e1eab0341d6bf076bcbbad389584ac1db4451fd6bf3dd760725bf9138bb19a5a",
+      "output_stream_sha256": "SHA256=e1eab0341d6bf076bcbbad389584ac1db4451fd6bf3dd760725bf9138bb19a5a",
+      "kokoro_af_heart": true,
+      "music_and_real_nature_sound_preserved": true
+    },
+    "chapter_title_timing": "same as V4 (no retime)",
+    "source_visual_no_repeat": "PASS",
+    "added_clips_motion_hashes": {
+      "castaneus": 50,
+      "americanus": 50
+    },
+    "full_ffmpeg_decode": "PASS"
+  }
 }
