@@ -1,0 +1,93 @@
+name: SBV Zombie Ant V6 - further original Ophiocordyceps motion
+on:
+  push:
+    branches:
+      - sbv-zombie-ant-v6-real-staggering
+    paths-ignore:
+      - sbv_v6_verified_result.json
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    steps:
+      - name: Checkout isolated V6 production branch
+        uses: actions/checkout@v4
+      - name: Install FFmpeg binary and syntax-check source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q imageio-ffmpeg
+          python3 - <<'PY'
+          from pathlib import Path
+          import os,imageio_ffmpeg
+          binary=Path(imageio_ffmpeg.get_ffmpeg_exe())
+          out=Path("portable_bin").resolve()
+          out.mkdir(exist_ok=True)
+          (out/"ffmpeg").symlink_to(binary.resolve())
+          with open(os.environ["GITHUB_PATH"],"a") as f:f.write(str(out)+"\n")
+          print("FFmpeg:",binary)
+          PY
+          python3 -m py_compile sbv_v6_insert_2023_staggers.py
+      - name: Download previously verified V5 and original 2023 research video
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p v5_input v6_sources
+          gh run download 40383182514 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_V5_REAL_SCIENTIFIC_FOOTAGE_FINAL -D v5_input
+          cp v5_input/SBV_ZOMBIE_ANT_V5_REAL_ZOMBIE_ANTS_NO_REPEATS.mp4 v6_sources/
+          cp v5_input/V5_NO_REPEAT_EDL.json v6_sources/
+          curl -fLSs --retry 5 --retry-delay 3 --connect-timeout 25 --max-time 240 \
+            -A 'Mozilla/5.0 (SBV nature documentary) research citation editor' \
+            'https://ars.els-cdn.com/content/image/1-s2.0-S0003347223001616-mmc2.mp4' \
+            -o v6_sources/Beckerson_2023_Ophiocordyceps_infected_ant_staggering.mp4
+          test -s v6_sources/SBV_ZOMBIE_ANT_V5_REAL_ZOMBIE_ANTS_NO_REPEATS.mp4
+          test -s v6_sources/Beckerson_2023_Ophiocordyceps_infected_ant_staggering.mp4
+          ffmpeg -v error -xerror -i v6_sources/Beckerson_2023_Ophiocordyceps_infected_ant_staggering.mp4 -f null -
+      - name: Render one new unique real infected-ant motion segment and verify original audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 sbv_v6_insert_2023_staggers.py
+      - name: Upload finished video, proof of originality, subtitles and source credits
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_ZOMBIE_ANT_V6_NEW_INFECTED_STAGGERS_FINAL
+          path: v6_output/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish direct MP4 link without ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create sbv-zombie-ant-v6-real-infected-ants-20261026 \
+            v6_output/SBV_ZOMBIE_ANT_V6_EXTRA_REAL_STAGGERING_FOOTAGE.mp4 \
+            v6_output/CREDITS_SCIENTIFIC_SOURCES_V6.txt \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" \
+            --title "Strange, But Verified — Zombie Ants V6 (new genuine staggering footage)" \
+            --notes "One new genuine research video: Ophiocordyceps-infected Camponotus floridanus staggering. Beckerson et al. Animal Behaviour (2023), 203:225-240, CC BY 4.0. Replaces one further stock ant clip in The Climb without repeating footage. Kokoro af_heart, soundtrack, forest sound, titles and timing preserved bit-exact from V5. No YouTube publication."
+      - name: Record real version status
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          video=Path("v6_output/SBV_ZOMBIE_ANT_V6_EXTRA_REAL_STAGGERING_FOOTAGE.mp4")
+          qa=Path("v6_output/QA_V6_REAL_OPHIOCORDYCEPS.json")
+          status={"run_id":os.environ.get("GITHUB_RUN_ID"),"video_exists":video.is_file(),"bytes":video.stat().st_size if video.is_file() else 0,"qa":json.loads(qa.read_text()) if qa.is_file() else None}
+          Path("sbv_v6_verified_result.json").write_text(json.dumps(status,indent=2))
+          print(json.dumps(status,indent=2))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sbv_v6_verified_result.json
+          git commit -m "Record verified documentary V6 render outcome" || true
+          git push origin HEAD:sbv-zombie-ant-v6-real-staggering
