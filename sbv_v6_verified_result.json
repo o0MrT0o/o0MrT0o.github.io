@@ -1,0 +1,28 @@
+{
+  "run_id": "40386807928",
+  "video_exists": true,
+  "bytes": 147729220,
+  "qa": {
+    "status": "PASS",
+    "output_file": "SBV_ZOMBIE_ANT_V6_EXTRA_REAL_STAGGERING_FOOTAGE.mp4",
+    "size_bytes": 147729220,
+    "duration_sec": 244.87,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "moving_video_sources": 20,
+    "reused_clip_count": 0,
+    "genuine_infected_ant_source_count": 4,
+    "new_source": "Beckerson et al. (2023), genuinely Ophiocordyceps-infected Camponotus floridanus with staggering behavior, supplemental video S1.",
+    "new_original_clip_seconds": 14.31,
+    "new_time_used_seconds": 6.2,
+    "replaced_stock_source": "leafcutter",
+    "insert_time_seconds": 59.033,
+    "added_clip_motion_unique_hashes": 45,
+    "original_v5_kokoro_and_music_bitalike": true,
+    "original_audio_sha256": "SHA256=e1eab0341d6bf076bcbbad389584ac1db4451fd6bf3dd760725bf9138bb19a5a",
+    "new_audio_sha256": "SHA256=e1eab0341d6bf076bcbbad389584ac1db4451fd6bf3dd760725bf9138bb19a5a",
+    "chapter_titles_and_pauses_unchanged": true,
+    "no_stills_or_generated_biology": true,
+    "full_mp4_decode": "PASS"
+  }
+}
