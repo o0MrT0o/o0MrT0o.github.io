@@ -287,7 +287,7 @@ for name,(urls,lic) in AUDIO.items():
         shell(["ffmpeg","-hide_banner","-loglevel","error","-y",
           "-f","lavfi","-i",f"anoisesrc=color={color}:amplitude=0.045:sample_rate=48000",
           "-t","132","-af",f"lowpass=f={frequency},highpass=f=45",
-          "-c:a","pcm_s16le",str(dest)],True)
+          "-c:a","pcm_s16le","-f","wav",str(dest)],True)
         resolved_audio[name]=(
           "self-composed synthetic atmospheric soundscape (NOT field recording)",
           "original sound design, generated procedural audio",132)
