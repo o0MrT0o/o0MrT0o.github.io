@@ -65,9 +65,8 @@ ASSETS={
  "https://opengameart.org/sites/default/files/birds-isaiah658.ogg",
 ],"isaiah658 - Ambient Bird Sounds - original field recording - CC0 - https://opengameart.org/content/ambient-bird-sounds",5),
 "crickets":([
- "https://opengameart.org/sites/default/files/crickets_3.mp3",
  "https://opengameart.org/sites/default/files/crickets_1.mp3",
-],"Wolfgang_ - Crickets Ambient Noise (CC0) - https://opengameart.org/content/crickets-general-calm-ambient-music",6),
+],"Wolfgang_ - Crickets Ambient Noise Loopable (CC0) - https://opengameart.org/content/crickets-ambient-noise-loopable",6),
 "wind":([
  "https://opengameart.org/sites/default/files/Birds%20and%20Wind%20-%20Ambient_1.ogg",
 ],"Spring Spring - Birds and Wind Ambient - CC0 - https://opengameart.org/content/birds-and-wind-ambient-birds-wind-and-synth",8),
@@ -144,7 +143,7 @@ base+=(f",drawbox=x=(w-260)/2:y=h*0.68:w=260:h=3:"
 # Music: score 1 -> score 2, dramatic transition around midpoint.
 music_1=min(124.5, duration*.55)
 music_2=duration-music_1+4.5
-assert music_2<125 and music_1<125
+assert music_2<126 and music_1<126
 # Input map: 0 existing cinematic video; 1 ORIGINAL voice with genuine gaps;
 # 2 score1; 3 score2; 4 real woodland ambience; 5 birds; 6 crickets (optional); 7 wind (optional).
 inputs=["-i",str(ORIGINAL),"-i",str(voice),
@@ -233,6 +232,14 @@ qa={"status":"PASS","file":MASTER.name,"duration_seconds":round(dout,2),
 "decoder_test":"PASS","subtitles":"original V3 SRT remains valid because video timeline has not been shifted"}
 (OUT/"QA_V4.json").write_text(json.dumps(qa,indent=2))
 (OUT/"AUDIO_LICENSES.json").write_text(json.dumps(meta,indent=2))
+(OUT/"CREDITS_AND_SOURCES.txt").write_text(
+    "STRANGE, BUT VERIFIED - Ophiocordyceps Documentary, Cinematic Nature V4\n\n"
+    + "SCIENTIFIC VIDEO: Hughes et al. 2011 BMC Ecology, CC BY 2.0, DOI 10.1186/1472-6785-11-13.\n"
+    + "OTHER VIDEO: Pexels real footage, different insect/fungal species, illustrative only.\n"
+    + "MUSIC + FIELD RECORDINGS:\n"
+    + "\n".join(f"{key}: {item['license']}\n  {item['source']}" for key,item in meta.items())
+    + "\n\nAll title lettering is superimposed over continuous, existing moving footage. "
+    + "No photograph, CGI insect, additional shot or video loop was added.\n")
 shutil.copy2(P/"v3_source"/"SUBTITLES_EN.srt",OUT/"SUBTITLES_EN.srt")
 shutil.copy2(OLD_EDL,OUT/"NO_REPEAT_EDL.json")
 shutil.copy2(OLD_TIMINGS,OUT/"VERIFIED_CHAPTER_AUDIO_TIMINGS.json")
