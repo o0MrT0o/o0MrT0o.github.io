@@ -102,20 +102,14 @@ else:
     ]
 parts += [
  f"[1:v]fps=30,trim=start_frame={s1_frame}:end_frame={s1_frame+R1},setpts=PTS-STARTPTS,"
- "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,setsar=1,format=yuv420p,"
- f"drawtext=fontfile={FONT}:text='{tag}':fontsize=19:"
- "fontcolor=white@0.92:bordercolor=black@0.72:borderw=2:x=45:y=38:"
- "enable='between(t,0,2.3)'[science1]",
+ "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,setsar=1,format=yuv420p[science1]",
  f"[2:v]fps=30,trim=start_frame={s2_frame}:end_frame={s2_frame+R2},"
  "setpts=PTS-STARTPTS,split=2[vn_bg][vn_fg]",
  "[vn_bg]scale=1920:1080:force_original_aspect_ratio=increase,"
  "crop=1920:1080,gblur=sigma=35:steps=2,"
  "eq=brightness=-0.13:saturation=0.82[bgportrait]",
  "[vn_fg]scale=608:1080:force_original_aspect_ratio=decrease,setsar=1,format=yuv420p[fgportrait]",
- "[bgportrait][fgportrait]overlay=x=(W-w)/2:y=(H-h)/2:shortest=1,"
- f"drawtext=fontfile={FONT}:text='{tag}':fontsize=19:"
- "fontcolor=white@0.92:bordercolor=black@0.72:borderw=2:x=45:y=38:"
- "enable='between(t,0,2.3)'[science2]",
+ "[bgportrait][fgportrait]overlay=x=(W-w)/2:y=(H-h)/2:shortest=1[science2]",
 ]
 parts.append(
  ("[p0][science1][science2][p2]concat=n=4:v=1:a=0," if adjacent else
