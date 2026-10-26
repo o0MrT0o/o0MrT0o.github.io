@@ -1,0 +1,30 @@
+name: Verify SBV Documentary Background Music URLs
+on:
+  push:
+    branches: [sbv-audio-source-probe-20261026]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe licensed soundtrack host mirrors
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request
+          sources = {
+          "commons_original":"https://upload.wikimedia.org/wikipedia/commons/6/6d/John_Bartmann_-_dark-highway-master.ogg",
+          "commons_special":"https://commons.wikimedia.org/wiki/Special:Redirect/file/John_Bartmann_-_dark-highway-master.ogg",
+          "FMA_John_Bartmann":"https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/UDu2MITfQLDYrPAQl83OVpBn4ahW10HvNtHRn3kl.mp3",
+          "incompetech_MacLeod":"https://incompetech.com/music/royalty-free/mp3-royaltyfree/Long%20Note%20Two.mp3",
+          "FMA_dyne":"https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/veCj5PdYajKUZxwu9Juf5HL19kRsXBDmuN28gJWS.mp3",
+          "audio_birds":"https://upload.wikimedia.org/wikipedia/commons/2/2f/Birds_chirping_in_a_garden.ogg",
+          }
+          for k,url in sources.items():
+             try:
+               req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0","Range":"bytes=0-127"})
+               with urllib.request.urlopen(req,timeout=18) as r:
+                  payload=r.read(128)
+                  print("SUCCESS",k,r.status,r.headers.get("content-length"),r.headers.get("content-type"),len(payload),flush=True)
+             except Exception as e:
+                  print("FAIL",k,str(e)[:200],flush=True)
+          PY
