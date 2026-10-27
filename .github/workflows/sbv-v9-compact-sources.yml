@@ -24,10 +24,10 @@ jobs:
           PY
       - name: Extract source videos from validated prior run
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh run download 40478526602 -n SBV_V9_FRESH_FIELD_FOOTAGE --repo "\${{ github.repository }}" -D source
+          gh run download 40478526602 -n SBV_V9_FRESH_FIELD_FOOTAGE --repo "${{ github.repository }}" -D source
           mkdir -p final_media
           cp source/*.mp4 final_media/
           cp source/SOURCE_MANIFEST.json final_media/
