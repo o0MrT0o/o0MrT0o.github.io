@@ -1,0 +1,888 @@
+{
+  "movie_seconds": 244,
+  "total_frames_sampled": 122,
+  "source_scenes": 20,
+  "suspect_shots": [],
+  "all_shots": [
+    {
+      "file_id": "research_zombie",
+      "chapter": 0,
+      "start": 0.0,
+      "end": 9.0,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 10.5,
+          "middle_nonblack_pct": 93.7,
+          "suspect": false,
+          "actual_time_sec": 2
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 10.4,
+          "middle_nonblack_pct": 94.6,
+          "suspect": false,
+          "actual_time_sec": 4
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 10.8,
+          "middle_nonblack_pct": 91.5,
+          "suspect": false,
+          "actual_time_sec": 8
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": true
+    },
+    {
+      "file_id": "ants_on_leaves",
+      "chapter": 0,
+      "start": 9.0,
+      "end": 15.8,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 3.8,
+          "middle_nonblack_pct": 97.4,
+          "suspect": false,
+          "actual_time_sec": 10
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 3.7,
+          "middle_nonblack_pct": 97.2,
+          "suspect": false,
+          "actual_time_sec": 12
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 3.8,
+          "middle_nonblack_pct": 97.5,
+          "suspect": false,
+          "actual_time_sec": 14
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "ant_plant",
+      "chapter": 0,
+      "start": 15.8,
+      "end": 19.8,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.0,
+          "middle_nonblack_pct": 91.6,
+          "suspect": false,
+          "actual_time_sec": 16
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.0,
+          "middle_nonblack_pct": 87.4,
+          "suspect": false,
+          "actual_time_sec": 18
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 15.9,
+          "middle_nonblack_pct": 71.6,
+          "suspect": false,
+          "actual_time_sec": 20
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "research_healthy",
+      "chapter": 1,
+      "start": 19.8,
+      "end": 31.8,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 15.2,
+          "middle_nonblack_pct": 71.7,
+          "suspect": false,
+          "actual_time_sec": 22
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 5.0,
+          "middle_nonblack_pct": 81.7,
+          "suspect": false,
+          "actual_time_sec": 26
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 5.0,
+          "middle_nonblack_pct": 81.7,
+          "suspect": false,
+          "actual_time_sec": 30
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": true
+    },
+    {
+      "file_id": "ants_swarming",
+      "chapter": 1,
+      "start": 31.8,
+      "end": 47.033,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.2,
+          "middle_nonblack_pct": 95.4,
+          "suspect": false,
+          "actual_time_sec": 34
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.2,
+          "middle_nonblack_pct": 94.5,
+          "suspect": false,
+          "actual_time_sec": 40
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.3,
+          "middle_nonblack_pct": 94.4,
+          "suspect": false,
+          "actual_time_sec": 44
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "weaver_ants",
+      "chapter": 1,
+      "start": 47.033,
+      "end": 59.033,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.0,
+          "middle_nonblack_pct": 100.0,
+          "suspect": false,
+          "actual_time_sec": 50
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.0,
+          "middle_nonblack_pct": 100.0,
+          "suspect": false,
+          "actual_time_sec": 54
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.0,
+          "middle_nonblack_pct": 100.0,
+          "suspect": false,
+          "actual_time_sec": 56
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "pexels_3617015_black_ants_tree_branch",
+      "chapter": 2,
+      "start": 59.033,
+      "end": 65.233,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.1,
+          "middle_nonblack_pct": 83.3,
+          "suspect": false,
+          "actual_time_sec": 60
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 3.9,
+          "middle_nonblack_pct": 70.3,
+          "suspect": false,
+          "actual_time_sec": 62
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.6,
+          "middle_nonblack_pct": 65.2,
+          "suspect": false,
+          "actual_time_sec": 64
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "leaf_carrier",
+      "chapter": 2,
+      "start": 65.233,
+      "end": 87.933,
+      "sampled_frames": [
+        {
+          "left": 8,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 2.5,
+          "outer_black_pct": 10.5,
+          "middle_nonblack_pct": 96.5,
+          "suspect": false,
+          "actual_time_sec": 70
+        },
+        {
+          "left": 8,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 2.5,
+          "outer_black_pct": 10.4,
+          "middle_nonblack_pct": 96.2,
+          "suspect": false,
+          "actual_time_sec": 76
+        },
+        {
+          "left": 8,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 2.5,
+          "outer_black_pct": 10.3,
+          "middle_nonblack_pct": 96.5,
+          "suspect": false,
+          "actual_time_sec": 84
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 2.5,
+      "research": false
+    },
+    {
+      "file_id": "grass_ants",
+      "chapter": 2,
+      "start": 87.933,
+      "end": 98.233,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.1,
+          "middle_nonblack_pct": 99.0,
+          "suspect": false,
+          "actual_time_sec": 90
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.3,
+          "middle_nonblack_pct": 99.2,
+          "suspect": false,
+          "actual_time_sec": 94
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.2,
+          "middle_nonblack_pct": 99.0,
+          "suspect": false,
+          "actual_time_sec": 96
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "pexels_12633171_ants_on_wood_lush",
+      "chapter": 3,
+      "start": 98.233,
+      "end": 113.233,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 1.5,
+          "middle_nonblack_pct": 97.0,
+          "suspect": false,
+          "actual_time_sec": 100
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 1.5,
+          "middle_nonblack_pct": 96.3,
+          "suspect": false,
+          "actual_time_sec": 106
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 1.4,
+          "middle_nonblack_pct": 95.6,
+          "suspect": false,
+          "actual_time_sec": 110
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "pexels_3239802_ant_on_green_moss",
+      "chapter": 3,
+      "start": 113.233,
+      "end": 127.8,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 27.8,
+          "middle_nonblack_pct": 52.9,
+          "suspect": false,
+          "actual_time_sec": 116
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 27.9,
+          "middle_nonblack_pct": 53.3,
+          "suspect": false,
+          "actual_time_sec": 120
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 27.9,
+          "middle_nonblack_pct": 56.4,
+          "suspect": false,
+          "actual_time_sec": 126
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "black_ants",
+      "chapter": 3,
+      "start": 127.8,
+      "end": 132.8,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 6.0,
+          "middle_nonblack_pct": 91.9,
+          "suspect": false,
+          "actual_time_sec": 128
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 2.7,
+          "middle_nonblack_pct": 90.9,
+          "suspect": false,
+          "actual_time_sec": 130
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 21.2,
+          "middle_nonblack_pct": 75.6,
+          "suspect": false,
+          "actual_time_sec": 132
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "ant_colony1",
+      "chapter": 4,
+      "start": 132.8,
+      "end": 160.8,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 20.2,
+          "middle_nonblack_pct": 77.0,
+          "suspect": false,
+          "actual_time_sec": 138
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 13.4,
+          "middle_nonblack_pct": 91.1,
+          "suspect": false,
+          "actual_time_sec": 146
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 13.3,
+          "middle_nonblack_pct": 86.4,
+          "suspect": false,
+          "actual_time_sec": 156
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "ant_colony2",
+      "chapter": 4,
+      "start": 160.8,
+      "end": 188.267,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.6,
+          "middle_nonblack_pct": 98.0,
+          "suspect": false,
+          "actual_time_sec": 166
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.5,
+          "middle_nonblack_pct": 98.1,
+          "suspect": false,
+          "actual_time_sec": 174
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.5,
+          "middle_nonblack_pct": 98.3,
+          "suspect": false,
+          "actual_time_sec": 184
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "small_colony",
+      "chapter": 4,
+      "start": 188.267,
+      "end": 193.5,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 1.2,
+          "middle_nonblack_pct": 84.6,
+          "suspect": false,
+          "actual_time_sec": 190
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 1.2,
+          "middle_nonblack_pct": 84.6,
+          "suspect": false,
+          "actual_time_sec": 190
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 1.3,
+          "middle_nonblack_pct": 87.0,
+          "suspect": false,
+          "actual_time_sec": 192
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "mushrooms",
+      "chapter": 5,
+      "start": 193.5,
+      "end": 205.3,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 16.5,
+          "middle_nonblack_pct": 81.9,
+          "suspect": false,
+          "actual_time_sec": 196
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 15.4,
+          "middle_nonblack_pct": 88.8,
+          "suspect": false,
+          "actual_time_sec": 200
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 20.6,
+          "middle_nonblack_pct": 69.6,
+          "suspect": false,
+          "actual_time_sec": 204
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "mushroom_timelapse",
+      "chapter": 5,
+      "start": 205.3,
+      "end": 219.3,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 1.2,
+          "middle_nonblack_pct": 100.0,
+          "suspect": false,
+          "actual_time_sec": 208
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 1.0,
+          "middle_nonblack_pct": 100.0,
+          "suspect": false,
+          "actual_time_sec": 212
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 0.9,
+          "middle_nonblack_pct": 100.0,
+          "suspect": false,
+          "actual_time_sec": 216
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "moss",
+      "chapter": 5,
+      "start": 219.3,
+      "end": 227.3,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 41.5,
+          "middle_nonblack_pct": 41.9,
+          "suspect": false,
+          "actual_time_sec": 220
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 41.2,
+          "middle_nonblack_pct": 35.2,
+          "suspect": false,
+          "actual_time_sec": 224
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 36.4,
+          "middle_nonblack_pct": 20.0,
+          "suspect": false,
+          "actual_time_sec": 226
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "forestlog",
+      "chapter": 6,
+      "start": 227.3,
+      "end": 238.3,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 4.3,
+          "middle_nonblack_pct": 84.1,
+          "suspect": false,
+          "actual_time_sec": 230
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 7.0,
+          "middle_nonblack_pct": 85.6,
+          "suspect": false,
+          "actual_time_sec": 232
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 1.0,
+          "middle_nonblack_pct": 97.3,
+          "suspect": false,
+          "actual_time_sec": 236
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    },
+    {
+      "file_id": "red_mushroom",
+      "chapter": 6,
+      "start": 238.3,
+      "end": 244.867,
+      "sampled_frames": [
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 30.2,
+          "middle_nonblack_pct": 50.7,
+          "suspect": false,
+          "actual_time_sec": 240
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 34.9,
+          "middle_nonblack_pct": 76.0,
+          "suspect": false,
+          "actual_time_sec": 242
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "pillarbox_pct": 0.0,
+          "outer_black_pct": 34.9,
+          "middle_nonblack_pct": 76.0,
+          "suspect": false,
+          "actual_time_sec": 242
+        }
+      ],
+      "black_inset_frames": 0,
+      "median_matte_pct": 0.0,
+      "research": false
+    }
+  ]
+}
