@@ -3,8 +3,8 @@ from pathlib import Path
 import subprocess,json, numpy as np
 from PIL import Image,ImageDraw,ImageFont
 P=Path.cwd()
-v7=P/"v9_source"/"SBV_ZOMBIE_ANT_V7_BALANCED_NATURE_SOUND.mp4"
-v8=P/"v9_source"/"SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4"
+v7=P/"v7_reference"/"SBV_ZOMBIE_ANT_V7_BALANCED_NATURE_SOUND.mp4"
+v8=P/"v8_reference"/"SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4"
 out=P/"v9_audit";out.mkdir(exist_ok=True)
 font=ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",15)
 def sample(src,t):
