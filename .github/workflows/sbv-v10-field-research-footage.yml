@@ -1,0 +1,29 @@
+name: SBV V10 - Retrieve authentic 2011 extra rainforest infected-ant frames
+on:
+  push:
+    branches: [sbv-zombie-ant-v10-extra-wild-footage-20261027]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch licensed footage of actual infected ant on leaf in Thai rainforest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p wild_research
+          curl -fL --retry 4 --retry-delay 2 --connect-timeout 20 --max-time 110 \
+            'https://media.springernature.com/original/springer-static/esm/art%3A10.1186%2F1472-6785-11-13/MediaObjects/12898_2011_173_MOESM2_ESM.MP4' \
+            -o wild_research/REAL_HUGHES_2011_OPHIOCORDYCEPS_THAILAND_ORIGINAL.mp4
+          test $(stat -c%s wild_research/REAL_HUGHES_2011_OPHIOCORDYCEPS_THAILAND_ORIGINAL.mp4) -gt 900000
+          sha256sum wild_research/*.mp4 | tee wild_research/SHA256SUMS.txt
+          printf '%s\n' 'Hughes D et al. 2011, BMC Ecology 11:13. Supplementary Video S2, genuine Ophiocordyceps-infected Camponotus leonardi on leaf vein in rainforest in southern Thailand. CC BY 2.0. DOI https://doi.org/10.1186/1472-6785-11-13. Original video, no changes. Original existing V9 opening uses frames around source seconds 5.52 through 14.52; only source seconds 14.52 onward may be used for a distinct additional shot without repeat.' >wild_research/SOURCE_RIGHTS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V10_REAL_FIELD_INFECTED_ANT_ORIGINAL
+          path: wild_research/
+          retention-days: 7
