@@ -1,0 +1,95 @@
+name: SBV Zombie Ant V7 - Balanced Cinematic Music and Nature
+on:
+  push:
+    branches: [sbv-zombie-ant-v7-balanced-sound-20261027]
+    paths-ignore:
+      - sbv_v7_verified_result.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  master:
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    steps:
+      - name: Checkout independent V7 audio master pipeline
+        uses: actions/checkout@v4
+      - name: Prepare portable FFmpeg and validate sound mixer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q imageio-ffmpeg
+          python3 - <<'PY'
+          import imageio_ffmpeg,os
+          from pathlib import Path
+          exe=Path(imageio_ffmpeg.get_ffmpeg_exe())
+          folder=Path("portable_bin").resolve();folder.mkdir(exist_ok=True)
+          (folder/"ffmpeg").symlink_to(exe.resolve())
+          with open(os.environ["GITHUB_PATH"],"a") as x:x.write(str(folder)+"\n")
+          print("FFmpeg portable version:",exe)
+          PY
+          python3 -m py_compile sbv_v7_balanced_sound.py
+      - name: Download QA-approved V6 original picture and unmodified Kokoro chapter WAVs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p v7_input
+          gh run download 40386807928 -n SBV_ZOMBIE_ANT_V6_NEW_INFECTED_STAGGERS_FINAL \
+            --repo "${{ github.repository }}" -D v7_input
+          gh run download 40303439642 -n SBV_ZOMBIE_ANT_KOKORO_AF_HEART_AUDIO \
+            --repo "${{ github.repository }}" -D v7_input
+          test -s v7_input/SBV_ZOMBIE_ANT_V6_EXTRA_REAL_STAGGERING_FOOTAGE.mp4
+          test -s v7_input/00_COLD_OPEN.wav
+          test -s v7_input/06_FINAL_TWIST.wav
+          ffmpeg -v error -xerror -i v7_input/SBV_ZOMBIE_ANT_V6_EXTRA_REAL_STAGGERING_FOOTAGE.mp4 -t 1 -f null -
+      - name: Rebuild balanced score and nature ambience with Kokoro clearly forward
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 sbv_v7_balanced_sound.py
+      - name: Export MP4 plus scientific credits and three audio review samples
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_ZOMBIE_ANT_V7_BALANCED_MUSIC_NATURE_MASTER
+          path: v7_output/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish directly downloadable final video MP4
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create sbv-zombie-ant-v7-balanced-audio-20261027 \
+            v7_output/SBV_ZOMBIE_ANT_V7_BALANCED_NATURE_SOUND.mp4 \
+            v7_output/V7_AUDIO_BALANCE_QA.json \
+            v7_output/V7_AUDIO_SOURCE_LICENSES.json \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "Strange, But Verified — Zombie Ants V7 (Balanced Cinematic Sound)" \
+            --notes "Same V6 scientific video frames (bit-identical H.264) with rebalanced sound: Kokoro af_heart voice in foreground, original CC0 cinematic tracks dynamic ducking, real quiet forest ambience, occasional birds/wind/crickets, silent film/chapter title breaks. Includes loudness audit. No repeated video shots, no photographs. Not uploaded to YouTube."
+      - name: Store verified result and exact run ID
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          video=Path("v7_output/SBV_ZOMBIE_ANT_V7_BALANCED_NATURE_SOUND.mp4")
+          qa=Path("v7_output/V7_AUDIO_BALANCE_QA.json")
+          info={"run_id":os.environ.get("GITHUB_RUN_ID"),"master_exists":video.is_file(),
+          "bytes":video.stat().st_size if video.is_file() else 0,
+          "qa":json.loads(qa.read_text()) if qa.is_file() else None}
+          Path("sbv_v7_verified_result.json").write_text(json.dumps(info,indent=2))
+          print(json.dumps(info,indent=2))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sbv_v7_verified_result.json
+          git commit -m "Record balanced cinematic V7 soundtrack audit and verified render" || true
+          git push origin HEAD:sbv-zombie-ant-v7-balanced-sound-20261027
