@@ -1,0 +1,41 @@
+name: SBV V9 - Real CC0 soundtrack source files
+on:
+  push:
+    branches: [sbv-zombie-ant-v9-nature-sound-assets]
+  workflow_dispatch:
+jobs:
+  soundtrack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Download identical independent real field and music audio sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p v9_sound_sources
+          curl -fLSs --retry 4 --retry-delay 3 --max-time 120 \
+            'https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/UDu2MITfQLDYrPAQl83OVpBn4ahW10HvNtHRn3kl.mp3' \
+            -o v9_sound_sources/score1.mp3
+          curl -fLSs --retry 4 --retry-delay 3 --max-time 120 \
+            'https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/veCj5PdYajKUZxwu9Juf5HL19kRsXBDmuN28gJWS.mp3' \
+            -o v9_sound_sources/score2.mp3
+          curl -fLSs --retry 4 --retry-delay 3 --max-time 120 \
+            'https://bigsoundbank.com/UPLOAD/mp3/0100.mp3' \
+            -o v9_sound_sources/forest.mp3
+          curl -fLSs --retry 4 --retry-delay 3 --max-time 120 \
+            'https://opengameart.org/sites/default/files/birds-isaiah658_0.ogg' \
+            -o v9_sound_sources/birds.ogg
+          curl -fLSs --retry 4 --retry-delay 3 --max-time 120 \
+            'https://opengameart.org/sites/default/files/Birds%20and%20Wind%20-%20Ambient_1.ogg' \
+            -o v9_sound_sources/wind.ogg
+          curl -fLSs --retry 4 --retry-delay 3 --max-time 120 \
+            'https://opengameart.org/sites/default/files/crickets_1.mp3' \
+            -o v9_sound_sources/crickets.mp3
+          ls -lah v9_sound_sources
+      - name: Save original licensed soundtrack tracks with attribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V9_ORIGINAL_REAL_CC0_MUSIC_AND_NATURE_AUDIO
+          path: v9_sound_sources/
+          retention-days: 7
+          if-no-files-found: error
