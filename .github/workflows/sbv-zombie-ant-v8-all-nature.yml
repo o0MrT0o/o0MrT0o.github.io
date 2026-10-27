@@ -1,0 +1,116 @@
+name: SBV Zombie Ant V8 - Full-screen nature montage, zero laboratory insets
+on:
+  push:
+    branches:
+      - sbv-zombie-ant-v8-all-nature-20261027
+    paths-ignore:
+      - sbv_v8_verified_result.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  forest_documentary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Check out standalone V8 editing pipeline
+        uses: actions/checkout@v4
+      - name: Prepare imageio portable FFmpeg without OS apt installation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q imageio-ffmpeg
+          python3 - <<'PY'
+          import imageio_ffmpeg,os
+          from pathlib import Path
+          exe=Path(imageio_ffmpeg.get_ffmpeg_exe())
+          b=Path("portable_bin").resolve(); b.mkdir(exist_ok=True)
+          (b/"ffmpeg").symlink_to(exe.resolve())
+          with open(os.environ["GITHUB_PATH"],"a") as f:f.write(str(b)+"\n")
+          print("FFmpeg:",exe)
+          PY
+          python3 -m py_compile sbv_v8_full_screen_forest.py
+      - name: Load audited V7 cinematic video and V6 source edit manifest
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p v8_source v6_manifest
+          gh run download 40456992666 --repo "${{ github.repository }}" \
+            -n SBV_ZOMBIE_ANT_V7_BALANCED_MUSIC_NATURE_MASTER -D v8_source
+          gh run download 40386807928 --repo "${{ github.repository }}" \
+            -n SBV_ZOMBIE_ANT_V6_NEW_INFECTED_STAGGERS_FINAL -D v6_manifest
+          cp v6_manifest/NO_REPEAT_EDL_V6.json v8_source/
+          test -s v8_source/SBV_ZOMBIE_ANT_V7_BALANCED_NATURE_SOUND.mp4
+          test -s v8_source/NO_REPEAT_EDL_V6.json
+          test -s v8_source/SUBTITLES_EN.srt
+      - name: Retrieve three separate verified real outdoors ant moving-video clips
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --retry 5 --retry-delay 3 \
+            --max-time 230 --connect-timeout 25 -A "Mozilla/5.0" \
+            'https://videos.pexels.com/video-files/3617015/3617015-hd_1920_1080_30fps.mp4' \
+            -o v8_source/pexels_3617015_black_ants_tree_branch.mp4
+          curl --fail --location --silent --show-error --retry 5 --retry-delay 3 \
+            --max-time 230 --connect-timeout 25 -A "Mozilla/5.0" \
+            'https://videos.pexels.com/video-files/12633171/12633171-hd_1920_1080_30fps.mp4' \
+            -o v8_source/pexels_12633171_ants_on_wood_lush.mp4
+          curl --fail --location --silent --show-error --retry 5 --retry-delay 3 \
+            --max-time 230 --connect-timeout 25 -A "Mozilla/5.0" \
+            'https://videos.pexels.com/video-files/3239802/3239802-hd_1920_1080_25fps.mp4' \
+            -o v8_source/pexels_3239802_ant_on_green_moss.mp4
+          for clip in v8_source/pexels*.mp4; do
+            test -s "$clip"
+            ffmpeg -hide_banner -loglevel error -xerror -i "$clip" -t 2 -f null -
+          done
+      - name: Replace all three framed lab scenes with three outdoor videos without repeats
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 sbv_v8_full_screen_forest.py
+      - name: Upload 1080p master, provenance, subtitles and proof shots
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_ZOMBIE_ANT_V8_OUTDOORS_NO_FRAMES_FINAL
+          path: v8_output/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish direct playable/downloadable MP4 (without ZIP)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create sbv-zombie-ant-v8-forest-cinematic-20261027 \
+            v8_output/SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4 \
+            v8_output/V8_SCIENCE_AND_VIDEO_CREDITS.txt \
+            v8_output/V8_FOREST_ONLY_QA.json \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" \
+            --title "Strange, But Verified — Zombie Ants V8 | Forest-only footage" \
+            --notes "V8 removes all three added lab-footage small inset scenes and restores 100% full-screen nature aesthetic. Replacements are three distinct genuine outdoor ANT footage clips on tree branches and moss. IMPORTANT: replacement Pexels videos show ordinary ants (illustrative), NOT authenticated Ophiocordyceps. Original Hughes et al. 2011 primary research wild-infected zombie-ant footage (CC BY 2.0) is kept. Identical V7 balanced music, nature and Kokoro af_heart AAC soundtrack bitstream; six chapter pauses retained. No duplicate video clips, no still photographs. NOT published to YouTube."
+      - name: Record verified V8 audit with exact run identifier
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          video=Path("v8_output/SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4")
+          qa=Path("v8_output/V8_FOREST_ONLY_QA.json")
+          info={"run_id":os.environ.get("GITHUB_RUN_ID"),
+                "master_exists":video.is_file(),
+                "bytes":video.stat().st_size if video.is_file() else 0,
+                "qa":json.loads(qa.read_text()) if qa.is_file() else None}
+          Path("sbv_v8_verified_result.json").write_text(json.dumps(info,indent=2))
+          print(json.dumps(info,indent=2))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sbv_v8_verified_result.json
+          git commit -m "Record V8 nature-documentary render result and audited full-frame shots" || true
+          git push origin HEAD:sbv-zombie-ant-v8-all-nature-20261027
