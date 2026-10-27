@@ -1,0 +1,62 @@
+name: SBV V9 - Prepare compact nature footage and genuine CC0 soundtrack originals
+on:
+  push:
+    branches: [sbv-zombie-ant-v9-media-bundle-20261027]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare portable transcoder
+        run: |
+          python3 -m pip install -q imageio-ffmpeg
+          python3 - <<'PY'
+          import imageio_ffmpeg,os
+          from pathlib import Path
+          d=Path("bin").resolve();d.mkdir(exist_ok=True)
+          (d/"ffmpeg").symlink_to(Path(imageio_ffmpeg.get_ffmpeg_exe()).resolve())
+          with open(os.environ["GITHUB_PATH"],"a") as f:f.write(str(d)+"\n")
+          PY
+      - name: Extract source videos from validated prior run
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run download 40478526602 -n SBV_V9_FRESH_FIELD_FOOTAGE --repo "\${{ github.repository }}" -D source
+          mkdir -p final_media
+          cp source/*.mp4 final_media/
+          cp source/SOURCE_MANIFEST.json final_media/
+          ffmpeg -hide_banner -loglevel error -y -ss 9 -i source/ants_soil.mp4 -t 13 -an -vf 'scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720' -c:v libx264 -preset veryfast -crf 23 -r 30 -pix_fmt yuv420p -movflags +faststart final_media/ants_soil_excerpt.mp4
+          rm -f final_media/ants_soil.mp4
+          ls -lah final_media/
+      - name: Preserve actual CC0 soundtrack and real nature audio
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import urllib.request,pathlib,shutil,json
+          target=pathlib.Path('final_media')
+          urls={
+           'score_dark_highway.mp3':'https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/UDu2MITfQLDYrPAQl83OVpBn4ahW10HvNtHRn3kl.mp3',
+           'score_dark_dyne.mp3':'https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/veCj5PdYajKUZxwu9Juf5HL19kRsXBDmuN28gJWS.mp3',
+           'ambience_forest.mp3':'https://bigsoundbank.com/UPLOAD/mp3/0100.mp3',
+           'ambience_birds.ogg':'https://opengameart.org/sites/default/files/birds-isaiah658_0.ogg',
+           'ambience_wind.ogg':'https://opengameart.org/sites/default/files/Birds%20and%20Wind%20-%20Ambient_1.ogg',
+           'ambience_crickets.mp3':'https://opengameart.org/sites/default/files/crickets_1.mp3'
+          }
+          for name,url in urls.items():
+            req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'})
+            with urllib.request.urlopen(req,timeout=70) as src,open(target/name,'wb') as dst:shutil.copyfileobj(src,dst)
+            print(name,(target/name).stat().st_size,flush=True)
+          (target/'AUDIO_ORIGINS.json').write_text(json.dumps(urls,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V9_COMPACT_NATURE_AND_AUDIO
+          path: final_media/
+          retention-days: 7
+          compression-level: 5
