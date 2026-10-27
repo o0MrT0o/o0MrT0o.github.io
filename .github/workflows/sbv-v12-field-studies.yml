@@ -1,0 +1,44 @@
+name: SBV V12 - Independent field-study real footage from Brazilian forest
+on:
+  push:
+    branches: [sbv-zombie-ant-v12-2019-forest-field-footage]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch separate CC BY 4.0 research movies from Scientific Reports
+        run: |
+          set -euo pipefail
+          mkdir -p research_field
+          curl -fLSs --retry 3 --max-time 130 \
+            'https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41598-019-49655-3/MediaObjects/41598_2019_49655_MOESM2_ESM.mp4' \
+            -o research_field/2019_Real_Brazilian_Forest_Ant_Trails_S1.mp4
+          curl -fLSs --retry 3 --max-time 130 \
+            'https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41598-019-49655-3/MediaObjects/41598_2019_49655_MOESM7_ESM.mp4' \
+            -o research_field/2019_Real_Brazilian_Forest_Leaf_Transport_S6.mp4
+          test -s research_field/2019_Real_Brazilian_Forest_Ant_Trails_S1.mp4
+          test -s research_field/2019_Real_Brazilian_Forest_Leaf_Transport_S6.mp4
+          sha256sum research_field/*.mp4 > research_field/SOURCE_SHA256SUMS.txt
+          cat > research_field/LICENSE_AND_CONTEXT.txt <<'EOF'
+          Imirzian N, Zhang Y, Kurze C, Loreto RG, Chen DZ, Hughes DP (2019)
+          Automated tracking and analysis of ant trajectories shows variation in forager exploration
+          Scientific Reports 9, article 13246, DOI: 10.1038/s41598-019-49655-3
+          S1 original: 41598_2019_49655_MOESM2_ESM.mp4
+          S6 original: 41598_2019_49655_MOESM7_ESM.mp4
+          License: CC BY 4.0 https://creativecommons.org/licenses/by/4.0/
+          Study location: Mata do Paraiso research forest, Minas Gerais, Brazil.
+          This video records NORMAL FORAGING ANTS in a forest where Ophiocordyceps
+          was documented. These ants are NOT verified as infected.
+          Correct attribution, source URL and editing changes must accompany use.
+          No third party credit exceptions observed for these supplementary videos.
+          EOF
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V12_INDEPENDENT_BRAZILIAN_FIELD_STUDY_VIDEO
+          path: research_field/
+          retention-days: 7
