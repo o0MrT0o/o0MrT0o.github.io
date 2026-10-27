@@ -29,11 +29,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p v9_source
-          gh run download 40456992666 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_V7_BALANCED_MUSIC_NATURE_MASTER -D v9_source
-          gh run download 40461898128 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_V8_FULL_SCREEN_FOREST_NO_LAB_1080P -D v9_source
-          test -s v9_source/SBV_ZOMBIE_ANT_V7_BALANCED_NATURE_SOUND.mp4
-          test -s v9_source/SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4
+          mkdir -p v7_reference v8_reference
+          gh run download 40456992666 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_V7_BALANCED_MUSIC_NATURE_MASTER -D v7_reference
+          gh run download 40461898128 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_V8_FULL_SCREEN_FOREST_NO_LAB_1080P -D v7_reference
+          test -s v7_reference/SBV_ZOMBIE_ANT_V7_BALANCED_NATURE_SOUND.mp4
+          test -s v8_reference/SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4
       - name: Compare 17 matched video timestamps, most importantly 61 seconds
         run: python3 sbv_v9_compare_v7_v8.py
       - name: Save direct evidence and permanent URL to the source branch
