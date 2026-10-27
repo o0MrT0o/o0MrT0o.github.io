@@ -182,7 +182,7 @@ audio_filters=[
 run(["ffmpeg","-hide_banner","-v","error","-y","-i",str(ORIG),
      "-i",str(video_tmp),"-i",str(HOOK_AUDIO),
      "-i",str(EXT/"score_dark_highway.mp3"),
-     "-stream_loop","-1","-i",str(EXT/"ambience_forest.mp3"),
+     "-i",str(EXT/"ambience_forest.mp3"),
      "-filter_complex",';'.join(audio_filters),"-map","1:v:0","-map","[aout]",
      "-c:v","copy","-c:a","aac","-b:a","256k","-ar","48000",
      "-movflags","+faststart","-t",f"{v8duration:.4f}",str(FINAL)])
