@@ -1,0 +1,45 @@
+name: SBV V10 - Original wild zombie ant source, unused research frames
+on:
+  push:
+    branches: [sbv-zombie-ant-v9-youtube-ready-20261027]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  get_original:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download original wild infected-ant 2011 supplementary footage, not laboratory
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p v10_field_source
+          curl -fLSs --retry 5 --retry-delay 4 --connect-timeout 25 --max-time 200 -A 'Mozilla/5.0 (SBV nature documentary)' \
+            'https://media.springernature.com/original/springer-static/esm/art%3A10.1186%2F1472-6785-11-13/MediaObjects/12898_2011_173_MOESM2_ESM.MP4' \
+            -o v10_field_source/HUGHES_2011_REAL_INFECTED_ANT_FOREST_S2.mp4
+          test -s v10_field_source/HUGHES_2011_REAL_INFECTED_ANT_FOREST_S2.mp4
+          python3 - <<'PY'
+          from pathlib import Path
+          f=Path('v10_field_source/HUGHES_2011_REAL_INFECTED_ANT_FOREST_S2.mp4')
+          print(f.stat().st_size)
+          assert f.stat().st_size>500000
+          PY
+          cat > v10_field_source/SOURCE_AND_LICENSE.txt <<'EOF'
+          Original scientific nature footage of Ophiocordyceps fungus-infected ant attached
+          to leaf vein in natural Thai rainforest, not staged lab footage.
+          Hughes et al. (2011), BMC Ecology, 11:13.
+          DOI: https://doi.org/10.1186/1472-6785-11-13
+          Additional file 2: http://www.biomedcentral.com/content/supplementary/1472-6785-11-13-S2.MP4
+          Publisher mirror:
+          https://media.springernature.com/original/springer-static/esm/art%3A10.1186%2F1472-6785-11-13/MediaObjects/12898_2011_173_MOESM2_ESM.MP4
+          License: Creative Commons Attribution 2.0.
+          This supplementary source includes video lasting approximately 20 seconds.
+          Use a genuinely unshown consecutive excerpt and do not repeat frames already present in V9.
+          EOF
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V10_REAL_WILD_ZOMBIE_ANT_UNUSED_RAW_SOURCE
+          path: v10_field_source/
+          retention-days: 7
