@@ -1,0 +1,47 @@
+name: SBV V10 - Additional independent CC BY 4 field-study parasite animation
+on:
+  push:
+    branches: [sbv-zombie-ant-v9-youtube-ready-20261027]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download actual 2014 Brazilian Ophiocordyceps field-study video from PLOS One
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p field_evidence
+          curl -fLSs --retry 5 --retry-delay 3 --connect-timeout 25 --max-time 210 -A 'Mozilla/5.0' \
+            'https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0103516.s005&type=supplementary' \
+            -o field_evidence/LORETO_2014_OPHIOCORDYCEPS_FOREST_STUDY.mp4
+          ls -lh field_evidence/*
+          python3 - <<'PY'
+          from pathlib import Path
+          f=Path('field_evidence/LORETO_2014_OPHIOCORDYCEPS_FOREST_STUDY.mp4')
+          d=f.read_bytes()[:512]
+          print('format bytes:',repr(d[:120]),flush=True)
+          assert f.stat().st_size>100000
+          assert b'<html' not in d.lower()
+          PY
+          cat > field_evidence/SOURCE_AND_LICENSE.txt <<'EOF'
+          Loreto RG, Elliot SL, Freitas MLR, Pereira TM, Hughes DP (2014).
+          Long-Term Disease Dynamics for a Specialized Parasite of Ant Societies: A Field Study.
+          PLOS ONE 9(8): e103516.
+          https://doi.org/10.1371/journal.pone.0103516
+          CC BY 4.0 https://creativecommons.org/licenses/by/4.0/
+          Supplementary Movie S1, mapping newly killed Camponotus rufipes and
+          existing ant cadavers infected by Ophiocordyceps camponoti-rufipedis
+          in natural Atlantic rainforest in Brazil.
+          IMPORTANT: Video is an animated scientific FIELD DATA MAP, not direct
+          filmed close-up of infected ants or the fungal fruiting body.
+          EOF
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V10_LORETO_BRAZIL_FOREST_FIELD_STUDY_CC_BY
+          path: field_evidence/
+          retention-days: 7
