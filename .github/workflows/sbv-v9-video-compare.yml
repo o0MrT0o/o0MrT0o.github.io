@@ -1,0 +1,53 @@
+name: SBV V9 - Compare actual older and corrected images, including 1m01
+on:
+  push:
+    branches: [sbv-zombie-ant-v9-visual-audit-20261027]
+    paths-ignore:
+      - v9_audit/**
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  side_by_side:
+    runs-on: ubuntu-latest
+    timeout-minutes: 26
+    steps:
+      - name: Checkout comparison script
+        uses: actions/checkout@v4
+      - name: Prepare FFmpeg and visual PIL
+        run: |
+          python3 -m pip install -q imageio-ffmpeg pillow numpy
+          python3 - <<'PY'
+          import imageio_ffmpeg,os
+          from pathlib import Path
+          folder=Path("portable_bin").resolve();folder.mkdir(exist_ok=True)
+          (folder/"ffmpeg").symlink_to(Path(imageio_ffmpeg.get_ffmpeg_exe()).resolve())
+          with open(os.environ["GITHUB_PATH"],"a") as f:f.write(str(folder)+"\n")
+          PY
+      - name: Download exact prior V7 with Petri dish and corrected V8
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p v9_source
+          gh run download 40456992666 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_V7_BALANCED_MUSIC_NATURE_MASTER -D v9_source
+          gh run download 40461898128 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_V8_FULL_SCREEN_FOREST_NO_LAB_1080P -D v9_source
+          test -s v9_source/SBV_ZOMBIE_ANT_V7_BALANCED_NATURE_SOUND.mp4
+          test -s v9_source/SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4
+      - name: Compare 17 matched video timestamps, most importantly 61 seconds
+        run: python3 sbv_v9_compare_v7_v8.py
+      - name: Save direct evidence and permanent URL to the source branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v9_audit/V7_VS_V8*.jpg v9_audit/V7_VS_V8*.json
+          git commit -m "Evidence: direct 1:01 shot comparison between V7 laboratory and V8 nature footage" || true
+          git push origin HEAD:sbv-zombie-ant-v9-visual-audit-20261027
+      - name: Attach video frame comparison contact sheet
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V7_V8_SIDE_BY_SIDE_1MIN01
+          path: |
+            v9_audit/V7_VS_V8*.jpg
+            v9_audit/V7_VS_V8*.json
+          retention-days: 7
