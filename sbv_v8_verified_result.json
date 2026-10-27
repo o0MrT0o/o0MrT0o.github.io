@@ -1,0 +1,69 @@
+{
+  "run_id": "40461898128",
+  "master_exists": true,
+  "size_bytes": 164661308,
+  "qa": {
+    "status": "PASS",
+    "file": "SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4",
+    "size_bytes": 164661308,
+    "duration_seconds": 244.87,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_source_count": 20,
+    "video_repetitions": 0,
+    "static_photographs": 0,
+    "laboratory_footage_clips_remaining": 0,
+    "original_research_field_footage_zombie_ant_retained": true,
+    "new_infected_zombie_ant_forest_clips_confirmed": 0,
+    "new_field_moving_footage_illustrative_regular_ants": 3,
+    "laboratory_source_intervals_removed": [
+      {
+        "id": "beckerson_2023_real_infected_camponotus_floridanus",
+        "start": 59.03333333333333,
+        "seconds": 6.2
+      },
+      {
+        "id": "deBekker_2014_castaneus_genuine_infected",
+        "start": 98.23333333333333,
+        "seconds": 15.0
+      },
+      {
+        "id": "deBekker_2014_americanus_genuine_infected",
+        "start": 113.23333333333333,
+        "seconds": 14.566666666666666
+      }
+    ],
+    "new_video_sources": [
+      {
+        "id": "pexels_3617015_black_ants_tree_branch",
+        "url": "https://www.pexels.com/video/a-black-ant-crawling-on-the-branch-of-a-tree-3617015/",
+        "used_seconds": 6.2,
+        "natural_environment": true,
+        "infection_confirmed": false,
+        "verified_moving_hash_count": 55
+      },
+      {
+        "id": "pexels_12633171_ants_on_wood_lush",
+        "url": "https://www.pexels.com/video/ants-on-wood-12633171/",
+        "used_seconds": 15.0,
+        "natural_environment": true,
+        "infection_confirmed": false,
+        "verified_moving_hash_count": 54
+      },
+      {
+        "id": "pexels_3239802_ant_on_green_moss",
+        "url": "https://www.pexels.com/video/red-ant-crawling-on-a-surface-covered-in-moss-3239802/",
+        "used_seconds": 14.566666666666666,
+        "natural_environment": true,
+        "infection_confirmed": false,
+        "verified_moving_hash_count": 54
+      }
+    ],
+    "frame_fill": "full bleed 16:9 crop, no inset/blurred portrait borders",
+    "audio_bit_identical_from_v7": true,
+    "original_audio_sha256": "SHA256=19ed39c81e96eb15d5203f54573a8666678caccc804be5e391f24dc1211472e5",
+    "final_audio_sha256": "SHA256=19ed39c81e96eb15d5203f54573a8666678caccc804be5e391f24dc1211472e5",
+    "Kokoro_music_nature_and_chapter_timing": "preserved",
+    "full_ffmpeg_decode": "PASS"
+  }
+}
