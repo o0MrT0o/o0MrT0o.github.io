@@ -52,7 +52,7 @@ assert 15<hookduration<19.3,hookduration
 media={
  "ants_bark":EXT/"ants_bark.mp4",
  "ants_green_leaves":EXT/"ants_green_leaves.mp4",
- "ants_soil_excerpt":EXT/"ants_soil_excerpt.mp4",
+ "ants_dead_bug":EXT/"ants_dead_bug.mp4",
  "ant_stem":EXT/"ant_stem.mp4",
  "ants_tree":EXT/"ants_tree.mp4",
  "rain_leaf_ants":EXT/"rain_leaf_ants.mp4",
@@ -67,7 +67,7 @@ media={
 replacements={
  "leaf_carrier":[("ants_bark",345),("ants_green_leaves",336)],
  "black_ants":[("hughes2011_unused_source",150)],
- "ant_colony1":[("ants_soil_excerpt",377),("ant_stem",463)],
+ "ant_colony1":[("ants_dead_bug",377),("ant_stem",463)],
  "ant_colony2":[("ants_tree",515),("rain_leaf_ants",309)],
  "mushrooms":[("ants_leafy_branch",354)],
  "mushroom_timelapse":[("fungus_dead_leaf",420)],
