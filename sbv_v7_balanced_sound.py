@@ -126,17 +126,17 @@ filters=[
  # Short real bird phrase at ~48 s, not incessant repetitive birds through whole film.
  "[5:a]aresample=48000,aformat=channel_layouts=stereo,"
  "atrim=0:5.8,asetpts=PTS-STARTPTS,highpass=f=620,lowpass=f=6000,"
- "loudnorm=I=-37.5:TP=-12:LRA=7,afade=t=in:st=0:d=1,"
+ "loudnorm=I=-37.5:TP=-9:LRA=7,afade=t=in:st=0:d=1,"
  "afade=t=out:st=4.8:d=1,adelay=48000|48000[birds_accent]",
  # Soft wind mid-film during explanation, used once.
  "[6:a]aresample=48000,aformat=channel_layouts=stereo,"
  "atrim=0:8.5,asetpts=PTS-STARTPTS,highpass=f=140,lowpass=f=4600,"
- "loudnorm=I=-37:TP=-11:LRA=7,afade=t=in:st=0:d=1.7,"
+ "loudnorm=I=-37:TP=-9:LRA=7,afade=t=in:st=0:d=1.7,"
  "afade=t=out:st=6.5:d=2,adelay=135000|135000[wind_accent]",
  # One soft 5 s cricket accent much later, never permanent chirping.
  "[7:a]aresample=48000,aformat=channel_layouts=stereo,"
  "atrim=0:5,asetpts=PTS-STARTPTS,highpass=f=450,lowpass=f=7100,"
- "loudnorm=I=-40:TP=-13:LRA=7,afade=t=in:st=0:d=1.1,"
+ "loudnorm=I=-40:TP=-9:LRA=7,afade=t=in:st=0:d=1.1,"
  "afade=t=out:st=3.9:d=1.1,adelay=205000|205000[crickets_accent]",
  "[voice][score_below_voice][forest_below_voice][birds_accent][wind_accent][crickets_accent]"
  "amix=inputs=6:duration=first:dropout_transition=0:normalize=0,"
