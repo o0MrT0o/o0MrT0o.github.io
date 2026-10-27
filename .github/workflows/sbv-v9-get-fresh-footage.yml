@@ -1,0 +1,80 @@
+name: SBV V9 - Verify and fetch distinct outdoor ant footage
+on:
+  push:
+    branches: [sbv-zombie-ant-v9-youtube-ready-20261027]
+    paths-ignore:
+      - "*.json"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  footage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download only source-authentic moving footage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q imageio-ffmpeg
+          python3 - <<'PY'
+          import urllib.request,subprocess,json,os,time,hashlib
+          from pathlib import Path
+          import imageio_ffmpeg
+          ff=imageio_ffmpeg.get_ffmpeg_exe()
+          d=Path("v9_media");d.mkdir(exist_ok=True)
+          candidates=[
+            ("ants_bark","9888614",["30","25","24"]),
+            ("ants_soil","7367254",["30","25","24"]),
+            ("ants_green_leaves","4309877",["30","25","24"]),
+            ("rain_leaf_ants","4349443",["30","25","24"]),
+            ("forest_floor_ants","40097453",["100","30","25"]),
+            ("ants_dead_bug","5000151",["30","25","24"]),
+            ("fungus_dead_leaf","3224616",["30","25","24"]),
+            ("ant_stem","15942941",["30","25","24"]),
+            ("ants_tree","854966",["24","30","25"]),
+            ("leafcutter_trunk","20494749",["25","30","24"]),
+            ("ants_leafy_branch","10021035",["30","25","24"]),
+            ("macro_forest_ants","7367254",["30","25","24"]),
+            ("forest_bark_fungi","6132609",["25","30","24"])
+          ]
+          report={};seen=set()
+          for key,id,framerates in candidates:
+            if id in seen:continue
+            seen.add(id)
+            success=False
+            for rate in framerates:
+              for resolution in ("1920_1080","1280_720"):
+                url=f"https://videos.pexels.com/video-files/{id}/{id}-hd_{resolution}_{rate}fps.mp4"
+                dest=d/(key+".mp4")
+                try:
+                  req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0 (X11; Linux x86_64)","Accept":"*/*"})
+                  with urllib.request.urlopen(req,timeout=27) as src,open(dest,"wb") as dst:
+                    import shutil;shutil.copyfileobj(src,dst)
+                  if dest.stat().st_size<100_000:raise RuntimeError("too small")
+                  p=subprocess.run([ff,"-hide_banner","-i",str(dest)],capture_output=True,text=True)
+                  import re
+                  dur=re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)",p.stderr)
+                  if not dur:raise RuntimeError("no video")
+                  secs=int(dur[1])*3600+int(dur[2])*60+float(dur[3])
+                  if secs<6.8:raise RuntimeError("too short "+str(secs))
+                  report[key]={"url":url,"duration":secs,"bytes":dest.stat().st_size,
+                    "license":"https://www.pexels.com/license/","ant_infected_confirmed":False}
+                  print("VALID",key,secs,dest.stat().st_size,flush=True)
+                  success=True;break
+                except Exception as e:
+                  print("SKIP",key,rate,resolution,str(e)[:120],flush=True)
+                  if dest.exists():dest.unlink()
+              if success:break
+          import json
+          (d/"SOURCE_MANIFEST.json").write_text(json.dumps(report,indent=2))
+          print("CONFIRMED SOURCE COUNT",len(report),flush=True)
+          if len(report)<8:raise RuntimeError("Need at least 8 unique nature videos, only "+str(list(report)))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V9_FRESH_FIELD_FOOTAGE
+          path: v9_media/
+          retention-days: 7
+          if-no-files-found: error
