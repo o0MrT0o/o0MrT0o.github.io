@@ -1,0 +1,101 @@
+name: SBV V12 - Verify genuine 2019 rainforest research field recordings
+on:
+  push:
+    branches: [sbv-zombie-ant-v12-field-research-2019]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  field:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FFmpeg/Pillow for authentic research-source verification
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q imageio-ffmpeg pillow
+          python3 - <<'PY'
+          import os,imageio_ffmpeg
+          from pathlib import Path
+          folder=Path("portable_bin").resolve();folder.mkdir(exist_ok=True)
+          (folder/"ffmpeg").symlink_to(Path(imageio_ffmpeg.get_ffmpeg_exe()).resolve())
+          with open(os.environ["GITHUB_PATH"],"a") as h:h.write(str(folder)+"\n")
+          PY
+      - name: Download video supplementary assets directly from Scientific Reports publisher
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p primary_2019 previews
+          python3 - <<'PY'
+          import urllib.request,json,hashlib,pathlib,time,subprocess,re
+          ROOT=pathlib.Path("primary_2019")
+          base="https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41598-019-49655-3/MediaObjects/"
+          meta={}
+          for idx in (2,3,4,5,6,7,8,9,10):
+            ext="mov" if idx in (5,6,10) else "mp4"
+            filename=f"41598_2019_49655_MOESM{idx}_ESM.{ext}"
+            dest=ROOT/filename
+            url=base+filename
+            err=None
+            for attempt in range(3):
+              try:
+                req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0","Accept":"*/*"})
+                with urllib.request.urlopen(req,timeout=55) as response,open(dest,"wb") as output:
+                  import shutil;shutil.copyfileobj(response,output)
+                if dest.stat().st_size<50000:raise RuntimeError("download too small")
+                p=subprocess.run(["ffmpeg","-hide_banner","-i",str(dest)],capture_output=True,text=True)
+                m=re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)",p.stderr)
+                if not m:raise RuntimeError("not a decodable video")
+                seconds=int(m[1])*3600+int(m[2])*60+float(m[3])
+                if seconds<2:raise RuntimeError("not enough moving footage")
+                meta[filename]={"source":url,"seconds":seconds,"bytes":dest.stat().st_size,
+                 "sha256":hashlib.sha256(dest.read_bytes()).hexdigest(),
+                 "attribution":"Imirzian N et al. 2019 Sci Rep 9:13246 CC BY 4.0"}
+                print("VERIFIED OUTDOOR SOURCE",filename,seconds,flush=True)
+                err=None;break
+              except Exception as e:
+                err=str(e);print("FETCH ERROR",filename,str(e)[:150],flush=True)
+                if dest.exists():dest.unlink()
+                time.sleep(2)
+            if err:
+              print("FAILED",filename,err,flush=True)
+          (ROOT/"RESEARCH_CLIP_LICENSES.json").write_text(json.dumps(meta,indent=2))
+          if len(meta)<4:raise RuntimeError("Insufficient verified field videos: "+str(len(meta)))
+          PY
+      - name: Generate unedited research-video contact sheet for visual species/context check
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib,subprocess,json,math,io
+          from PIL import Image,ImageDraw
+          root=pathlib.Path("primary_2019")
+          files=[(p,v) for p,v in ((root/name,data) for name,data in json.loads((root/"RESEARCH_CLIP_LICENSES.json").read_text()).items())]
+          frames=[]
+          for p,metadata in files:
+            for f in (0.2,0.5,0.8):
+              at=round(metadata["seconds"]*f,2)
+              q=subprocess.run(["ffmpeg","-loglevel","error","-ss",str(at),"-i",str(p),"-frames:v","1","-vf","scale=400:225:force_original_aspect_ratio=decrease,pad=400:225:(ow-iw)/2:(oh-ih)/2",
+                "-f","image2","-vcodec","mjpeg","-"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+              if q.returncode==0 and q.stdout:
+                frame=Image.open(io.BytesIO(q.stdout)).convert("RGB")
+                frames.append((p.name,at,frame))
+          cols=3;w=420;h=264
+          canvas=Image.new("RGB",(cols*w,math.ceil(len(frames)/cols)*h),(22,26,28))
+          draw=ImageDraw.Draw(canvas)
+          for i,(name,t,im) in enumerate(frames):
+            x=i%cols*w+10;y=i//cols*h+26
+            canvas.paste(im,(x,y))
+            draw.text((x,y-20),f"{name[23:]} / {t:.1f}s",fill=(239,245,247))
+          pathlib.Path("previews").mkdir(exist_ok=True)
+          canvas.save("previews/REAL_2019_FIELD_RESEARCH_CONTACT.jpg",quality=82)
+          print("Contact sheet video sources",len(files),"frames",len(frames),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SBV_REAL_2019_FOREST_FOOTAGE_SCIENTIFIC_REPORTS_CC_BY4
+          path: |
+            primary_2019/
+            previews/
+          retention-days: 7
+          if-no-files-found: error
