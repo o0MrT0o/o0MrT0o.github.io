@@ -1,0 +1,110 @@
+name: SBV Zombie Ant V10 - Additional genuine wild footage public documentary
+on:
+  push:
+    branches: [sbv-zombie-ant-v10-wild-extended-cut-20261027]
+    paths-ignore: [sbv_v10_result.json]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  final:
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    steps:
+      - name: Checkout final V10 documentary editor
+        uses: actions/checkout@v4
+      - name: Install FFmpeg and Pillow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q imageio-ffmpeg pillow
+          python3 - <<'PY'
+          import imageio_ffmpeg,os
+          from pathlib import Path
+          b=Path("ffmpeg_bin").resolve()
+          b.mkdir(exist_ok=True)
+          (b/"ffmpeg").symlink_to(Path(imageio_ffmpeg.get_ffmpeg_exe()).resolve())
+          with open(os.environ["GITHUB_PATH"],"a") as f:
+            f.write(str(b)+"\n")
+          PY
+          python3 -m py_compile sbv_v10_wild_directors_cut.py
+      - name: Retrieve fully audited V8 source video
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source fresh hook
+          gh run download 40461898128 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_V8_FULL_SCREEN_FOREST_NO_LAB_1080P -D source
+          test -s source/SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4
+          test -s source/V8_NO_REPEATS_NO_LAB_EDL.json
+          test -s source/SUBTITLES_EN.srt
+      - name: Retrieve licensed nature source clips and revised Kokoro hook
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh run download 40479203003 --repo "${{ github.repository }}" -n SBV_V9_COMPACT_NATURE_AND_AUDIO -D fresh
+          gh run download 40479295243 --repo "${{ github.repository }}" -n SBV_V9_NO_SPOILER_KOKORO_HOOK -D hook
+          for s in ants_bark ants_green_leaves ants_soil_excerpt ant_stem ants_tree rain_leaf_ants ants_leafy_branch fungus_dead_leaf leafcutter_trunk; do
+            test -s "fresh/$s.mp4"
+          done
+          test -s fresh/score_dark_highway.mp3
+          test -s fresh/ambience_forest.mp3
+          test -s hook/V9_NEW_SUSPENSE_COLD_OPEN_AF_HEART.wav
+      - name: Download source-original Ophiocordyceps-infected ant filmed in the rainforest
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLSs --retry 5 --retry-delay 3 --max-time 160 \
+            'https://media.springernature.com/original/springer-static/esm/art%3A10.1186%2F1472-6785-11-13/MediaObjects/12898_2011_173_MOESM2_ESM.MP4' \
+            -o source/REAL_HUGHES_2011_OPHIOCORDYCEPS_THAILAND_ORIGINAL.mp4
+          test -s source/REAL_HUGHES_2011_OPHIOCORDYCEPS_THAILAND_ORIGINAL.mp4
+      - name: Recut entire video and verify source time windows and true audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 sbv_v10_wild_directors_cut.py
+          ffmpeg -hide_banner -v error -xerror -i v10_output/SBV_ZOMBIE_ANT_V10_WILD_EXTENDED_YOUTUBE_FINAL.mp4 -f null -
+      - name: Export HD MP4, scientific credits, chapters, captions and thumbnail
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_ZOMBIE_ANT_V10_EXTRA_WILD_YOUTUBE_MASTER
+          path: v10_output/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish publicly downloadable MP4 on GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create sbv-zombie-ant-v10-extra-authentic-wild-20261027 \
+            v10_output/SBV_ZOMBIE_ANT_V10_WILD_EXTENDED_YOUTUBE_FINAL.mp4 \
+            v10_output/SUBTITLES_EN.srt \
+            v10_output/YOUTUBE_DESCRIPTION_AND_SOURCES.txt \
+            v10_output/YOUTUBE_THUMBNAIL_1280x720.jpg \
+            v10_output/FINAL_REVIEW_QA.json \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" \
+            --title "Strange, But Verified — Zombie Ants V10: The Extended Wild Documentary" \
+            --notes "Full HD documentary with an additional previously UNUSED 5-second portion (14.7 to 19.7 seconds) of the exact same genuine infected ant in the Thai forest recorded by Hughes et al. in 2011. These source frames do NOT overlap with the original 9 seconds used earlier. The extra footage is NOT a distinct independent scientific video. Also adds 9 distinct genuine nature footage sources of ordinary outdoor ants/forest, clearly illustrative rather than confirmed infected; trims long repetitive colony scenes and red mushroom, uses a new spoiler-free Kokoro af_heart introduction, preserves balanced music and nature under narration, provides English subtitles and thumbnail. Not posted to YouTube."
+      - name: Save verified build status
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,os
+          p=Path("v10_output/SBV_ZOMBIE_ANT_V10_WILD_EXTENDED_YOUTUBE_FINAL.mp4")
+          q=Path("v10_output/FINAL_REVIEW_QA.json")
+          result={"run_id":os.getenv("GITHUB_RUN_ID"),"video_exists":p.is_file(),"file_bytes":p.stat().st_size if p.is_file() else 0,"qa":json.loads(q.read_text()) if q.is_file() else None}
+          Path("sbv_v10_result.json").write_text(json.dumps(result,indent=2))
+          print(json.dumps(result,indent=2))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sbv_v10_result.json
+          git commit -m "Record audited extended genuine rainforest zombie-ant V10 master" || true
+          git push origin HEAD:sbv-zombie-ant-v10-wild-extended-cut-20261027
