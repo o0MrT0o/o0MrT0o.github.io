@@ -1,6 +1,43 @@
 {
-  "run_id": "40456853348",
-  "master_exists": false,
-  "bytes": 0,
-  "qa": null
+  "run_id": "40456992666",
+  "master_exists": true,
+  "bytes": 149616161,
+  "qa": {
+    "status": "PASS",
+    "file": "SBV_ZOMBIE_ANT_V7_BALANCED_NATURE_SOUND.mp4",
+    "size_bytes": 149616161,
+    "duration_seconds": 244.87,
+    "format": "MP4 H264(copy)+AAC 256k 48k stereo",
+    "video_stream_sha256_v6": "SHA256=255182cce184bd99f1089ddab8814406855dbf4114b56c22f50cda7ea5271865",
+    "video_stream_sha256_v7": "SHA256=255182cce184bd99f1089ddab8814406855dbf4114b56c22f50cda7ea5271865",
+    "video_bitrate_unchanged": true,
+    "visuals_exactly_as_v6": true,
+    "source_videos": 20,
+    "source_video_repeat_count": 0,
+    "static_images": 0,
+    "kokoro": "original af_heart 7 chapter WAVs unmodified, silent chapter pauses rebuilt",
+    "audio_mix": {
+      "narrator_target_lufs": -17,
+      "score_target_lufs": -25,
+      "forest_target_lufs": -32.5,
+      "nature_accents_lufs": [
+        -37.5,
+        -37,
+        -40
+      ],
+      "ducking": "sidechain compressor driven by narration: music strong, forest gentle",
+      "field_sounds": "real CC0 forest continuously; 1x birds; 1x wind; 1x crickets",
+      "music": "two original CC0 documentary tracks joined with crossfade",
+      "looped_birds_and_other_prominent_effects": false
+    },
+    "title_voice_silence_verified": true,
+    "music_audible_title_rms_dbfs": -25.4,
+    "audio_segment_rms_dbfs": {
+      "opening_voice": -19.16,
+      "title_music_no_voice": -25.4,
+      "chapter_2_narration": -18.22,
+      "later_forest_background": -19.18
+    },
+    "full_ffmpeg_decode": "PASS"
+  }
 }
