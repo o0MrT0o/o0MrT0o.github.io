@@ -1,0 +1,63 @@
+name: SBV V9 - Visual audit every 2 seconds for tiny videos and black borders
+on:
+  push:
+    branches: [sbv-zombie-ant-v9-visual-audit-20261027]
+    paths-ignore:
+      - v9_audit/**
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout film visual audit
+        uses: actions/checkout@v4
+      - name: Install lightweight frame sampling dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install -q imageio-ffmpeg pillow numpy
+          python3 - <<'PY'
+          import imageio_ffmpeg,os
+          from pathlib import Path
+          exe=Path(imageio_ffmpeg.get_ffmpeg_exe())
+          folder=Path("portable_bin").resolve();folder.mkdir(exist_ok=True)
+          (folder/"ffmpeg").symlink_to(exe.resolve())
+          with open(os.environ["GITHUB_PATH"],"a") as out:out.write(str(folder)+"\n")
+          PY
+          python3 -m py_compile sbv_v9_visual_audit.py
+      - name: Load exact final V8 and all 20 clip boundaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p v9_source
+          gh run download 40461898128 --repo "${{ github.repository }}" \
+            -n SBV_ZOMBIE_ANT_V8_FULL_SCREEN_FOREST_NO_LAB_1080P -D v9_source
+          test -s v9_source/SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4
+          test -s v9_source/V8_NO_REPEATS_NO_LAB_EDL.json
+      - name: Screen every 2 seconds plus 3 samples of every individual clip
+        run: |
+          set -euo pipefail
+          python3 sbv_v9_visual_audit.py
+      - name: Keep contact sheets accessible for direct visual inspection
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v9_audit/*.jpg v9_audit/FRAME_BY_FRAME_AUDIT.json
+          git commit -m "Store actual V8 contact sheets sampled at 2-second cadence" || true
+          git push origin HEAD:sbv-zombie-ant-v9-visual-audit-20261027
+      - name: Upload viewable frame-by-frame audit and images
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V8_FRAME_BY_FRAME_VISUAL_AUDIT
+          path: v9_audit/
+          retention-days: 7
+          if-no-files-found: error
