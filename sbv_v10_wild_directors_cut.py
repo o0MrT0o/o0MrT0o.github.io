@@ -174,7 +174,7 @@ audio_filters=[
  "[hook][score][forest]amix=inputs=3:duration=first:normalize=0,"
  "alimiter=limit=0.92[intro]",
  f"[0:a]atrim=start={intro_tail_start:.3f},asetpts=PTS-STARTPTS[old]",
- "[intro][old]acrossfade=d=.4:c1=tri:c2=tri,"
+ "[intro][old]acrossfade=d=0.4:c1=tri:c2=tri,"
  "alimiter=limit=.95[aout]"
 ]
 # Audio inputs: 0=V8 balanced documentary, 1=updated V10 visual (video-only),
