@@ -1,0 +1,71 @@
+name: SBV - Verify real 2019 tropical forest ant ecology footage
+on:
+  push:
+    branches: [sbv-infected-ant-2019-field-research-audit-20261027]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source_audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up portable ffmpeg
+        run: |
+          python3 -m pip install -q imageio-ffmpeg
+          python3 - <<'PY'
+          import os,imageio_ffmpeg
+          from pathlib import Path
+          d=Path("portable_bin").resolve();d.mkdir(exist_ok=True)
+          (d/"ffmpeg").symlink_to(Path(imageio_ffmpeg.get_ffmpeg_exe()).resolve())
+          with open(os.environ["GITHUB_PATH"],"a") as x:x.write(str(d)+"\n")
+          PY
+      - name: Fetch publisher original MP4/MOV from Imirzian and collaborators 2019 study
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p media
+          base="https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41598-019-49655-3/MediaObjects"
+          for pair in "2:S1.mp4" "3:S2.mp4" "4:S3.mp4" "5:S4.mov" "7:S6.mp4" "8:S7.mp4"; do
+            id="${pair%%:*}"
+            file="${pair#*:}"
+            url="${base}/41598_2019_49655_MOESM${id}_ESM.${file##*.}"
+            curl -LfsS --connect-timeout 20 --max-time 120 --retry 2 "$url" -o "media/$file" || rm -f "media/$file"
+            if [[ -s "media/$file" ]]; then
+              ffmpeg -v error -xerror -i "media/$file" -t 0.5 -f null - || rm -f "media/$file"
+              echo "$file $(wc -c < "media/$file")"
+            fi
+          done
+          ls -lh media/
+      - name: Convert unique field videos for viewing (not adding anything to film)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p media/preview
+          for vid in media/S?.mp4 media/S?.mov; do
+            if [[ -s "$vid" ]]; then
+              key="$(basename "$vid" | cut -d. -f1)"
+              ffmpeg -v error -y -i "$vid" -t 12 -an -vf "scale=960:540:force_original_aspect_ratio=increase,crop=960:540" -c:v libx264 -preset fast -crf 25 -r 24 "media/preview/${key}_review_12s.mp4"
+              ffmpeg -v error -y -i "$vid" -frames:v 1 -vf "scale=960:540:force_original_aspect_ratio=increase,crop=960:540" "media/preview/${key}_first.jpg"
+            fi
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          clips=list(Path("media").glob("S*.*"))
+          print("VERIFIED",[(p.name,p.stat().st_size) for p in clips])
+          Path("media/RESEARCH_PROVENANCE.json").write_text(json.dumps({
+            "article":"Imirzian et al., Automated tracking and analysis of ant trajectories shows variation in forager exploration",
+            "doi":"https://doi.org/10.1038/s41598-019-49655-3",
+            "license":"CC BY 4.0",
+            "IMPORTANT":"Actual ants in natural endemic Ophiocordyceps habitat. Infection NOT confirmed for moving foragers on these clips.",
+            "files":[{"name":p.name,"bytes":p.stat().st_size} for p in clips]
+          },indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SBV_2019_AUTHENTIC_WILD_RESEARCH_VIDEO
+          path: media/
+          retention-days: 7
+          if-no-files-found: error
