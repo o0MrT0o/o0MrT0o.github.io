@@ -38,8 +38,8 @@ jobs:
           gh run download 40461898128 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_V8_FULL_SCREEN_FOREST_NO_LAB_1080P -D baseline
           test -s baseline/SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4
       - name: Create six factual research-image and schematic overlays with accurate attribution
-        run: python3 sbv_v10_science_overlay_cards.py
-      - name: Upload six transparent cards, timeline JSON and V8 preview movie
+        run: SBV_SKIP_DEMO=1 python3 sbv_v10_science_overlay_cards.py
+      - name: Upload six transparent cards, timeline JSON and visual example
         uses: actions/upload-artifact@v4
         with:
           name: SBV_V10_SCIENTIFIC_OVERLAY_CARDS_AND_VISUAL_DEMO
