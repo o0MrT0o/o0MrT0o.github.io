@@ -47,4 +47,5 @@ jobs:
         run: |
           gh release upload sbv-zombie-ant-v9-science-overlays-20261028 \
             scientific_overlay_pack/*.png \
+            SBV_V9_SCIENCE_OVERLAY_ASSET_PACK.zip \
             --repo "${{ github.repository }}" --clobber
