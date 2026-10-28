@@ -2,6 +2,8 @@ name: SBV V9 - Six real science picture-in-picture overlays
 on:
   push:
     branches: [sbv-zombie-ant-v9-scientific-overlays-20261028]
+    paths-ignore:
+      - 'scientific_overlay_pack/**'
   workflow_dispatch:
 permissions:
   contents: write
@@ -32,6 +34,13 @@ jobs:
             scientific_overlay_pack/*.json
           retention-days: 7
           if-no-files-found: error
+      - name: Commit six ready-to-use transparent source figures to repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scientific_overlay_pack/*.png
+          git commit -m "Store PNG scientific overlays for Canva" || true
+          git push origin HEAD:sbv-zombie-ant-v9-scientific-overlays-20261028
       - name: Publish verified source-backed overlay asset ZIP
         env:
           GH_TOKEN: ${{ github.token }}
