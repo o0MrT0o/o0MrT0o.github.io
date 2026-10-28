@@ -105,13 +105,13 @@ timing=[
 # Single command; never remove source audio, overlay images appear only as brief side cards.
 inputs=[];parts=[]
 for i,(at,duration,side,concept,f) in enumerate(timing,1):
- inputs+=["-loop","1","-framerate","30","-i",str(O/f)]
+ inputs+=["-loop","1","-framerate","30","-i",f]
  st=int(at.split(":")[0])*60+int(at.split(":")[1])
  x="W-w-60" if side=="right" else "60"
  parts.append(f"[{i}:v]format=rgba,trim=duration={duration},fade=t=in:st=0:d=0.5:alpha=1,fade=t=out:st={duration-0.5}:d=0.5:alpha=1,setpts=PTS-STARTPTS+{st}/TB[ov{i}]")
  pre=f"[v{i-1}]" if i>1 else "[0:v]"
  parts.append(f"{pre}[ov{i}]overlay=x={x}:y=110:repeatlast=0:eof_action=pass[v{i}]")
-render=["ffmpeg","-hide_banner","-y","-i","INPUT_V9_MASTER.mp4"]+inputs+[
+render=["ffmpeg","-hide_banner","-y","-i","SBV_ZOMBIE_ANT_V9_YOUTUBE_READY_MASTER.mp4"]+inputs+[
  "-filter_complex",";".join(parts),"-map","[v6]","-map","0:a:0",
  "-c:v","libx264","-preset","medium","-crf","18","-r","30",
  "-pix_fmt","yuv420p","-c:a","copy","-movflags","+faststart",
