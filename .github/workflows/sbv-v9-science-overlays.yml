@@ -1,0 +1,45 @@
+name: SBV V9 - Six real science picture-in-picture overlays
+on:
+  push:
+    branches: [sbv-zombie-ant-v9-scientific-overlays-20261028]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  overlays:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install image composition libraries
+        run: |
+          python3 -m pip install --disable-pip-version-check -q pillow
+          python3 -m py_compile generate_sbv_scientific_overlays.py
+      - name: Create 6 original small overlays from scientific photographic sources
+        run: |
+          python3 generate_sbv_scientific_overlays.py
+          test -s SBV_V9_SCIENCE_OVERLAY_ASSET_PACK.zip
+          test -s scientific_overlay_pack/01_REAL_INFECTED_ANT.png
+          test -s scientific_overlay_pack/06_SPORE_SCHEMATIC.png
+      - name: Archive ready-to-use overlay PNG files and science credits
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V9_SIX_SCIENCE_OVERLAYS_TRANSPARENT
+          path: |
+            SBV_V9_SCIENCE_OVERLAY_ASSET_PACK.zip
+            scientific_overlay_pack/*.png
+            scientific_overlay_pack/*.txt
+            scientific_overlay_pack/*.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish verified source-backed overlay asset ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create sbv-zombie-ant-v9-science-overlays-20261028 \
+            SBV_V9_SCIENCE_OVERLAY_ASSET_PACK.zip \
+            scientific_overlay_pack/SOURCES_AND_CREDITS.txt \
+            scientific_overlay_pack/SUGGESTED_V9_OVERLAY_CUES.json \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" \
+            --title "SBV Zombie Ants - small transparent scientific overlays" \
+            --notes "Six 740 x 476 pixel transparent picture-in-picture images for science documentary V9. Four real scientific photos/figures from Hughes et al. 2011 and Hughes/Pontoppidan 2009; two original clearly labeled explanatory schematics. ZIP contains transparent PNGs, source credits, timestamps and automatic FFmpeg overlay script. NOT yet composited into source V9 MP4; V9 source is not in this GitHub repository. No full-screen slides."
