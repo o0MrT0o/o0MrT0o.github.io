@@ -53,9 +53,12 @@ def fetch_wikimedia(filename,dest):
 loaded={}
 for key,(name,credit,page) in photo_sources.items():
  target=ASSETS/("SOURCE_"+key+Path(name).suffix)
- fetch_wikimedia(name,target)
- loaded[key]=Image.open(target).convert("RGB")
- print("VERIFIED REAL SCIENTIFIC PHOTO",key,loaded[key].size,target.stat().st_size,flush=True)
+ try:
+  fetch_wikimedia(name,target)
+  loaded[key]=Image.open(target).convert("RGB")
+  print("VERIFIED REAL SCIENTIFIC PHOTO",key,loaded[key].size,target.stat().st_size,flush=True)
+ except Exception as e:
+  print("AUTHOR PHOTO UNAVAILABLE; switching to explicit scientific diagram:",key,str(e)[:100],flush=True)
 
 def card_base():
  im=Image.new("RGBA",(W,H),(0,0,0,0));draw=ImageDraw.Draw(im)
@@ -74,9 +77,35 @@ def label(im,head,lines,credit):
  d.text((30,414),credit,font=tiny,fill=(203,209,207,230))
 def photographic(name,source,header,lines,credit):
  img=card_base()
- # Insets are not replacement video; photo ~26% of total screen, never 100%.
- crop=fit_photo(loaded[source],(26,86,W-26,342))
- img.paste(crop,(26,86))
+ # Show real photo when download is permitted, otherwise our own clearly
+ # labelled original vector illustration — NEVER a generated fake photograph.
+ if source in loaded:
+  crop=fit_photo(loaded[source],(26,86,W-26,342))
+  img.paste(crop,(26,86))
+ else:
+  d=ImageDraw.Draw(img)
+  d.rounded_rectangle((26,88,604,342),radius=12,fill=(30,49,45,255),outline=(63,105,91,255),width=2)
+  header="SCHEMATIC  •  "+("DEATH GRIP" if source=="denis_ant" else "FUNGAL CYCLE")
+  credit="Original schematic · not a photograph"
+  if source=="denis_ant":
+   d.line((82,218,533,218),fill=(115,187,130,255),width=12)
+   d.ellipse((256,162,367,239),fill=(153,109,64,255),outline=CC,width=5)
+   d.ellipse((355,180,397,220),fill=(176,132,78,255))
+   d.line((380,191,400,215),fill=CC,width=6)
+   d.line((380,226,405,213),fill=CC,width=6)
+   d.text((80,108),"MANDIBLES  →  LEAF VEIN",font=fm,fill=white)
+  elif source=="aloony_ant":
+   d.line((76,280,522,280),fill=(115,187,130,255),width=11)
+   d.ellipse((265,231,370,277),fill=(145,100,64,255),outline=CC,width=4)
+   d.line((320,229,335,123),fill=(202,179,128,255),width=9)
+   d.ellipse((310,100,362,146),fill=(211,184,133,255))
+   d.text((65,113),"FRUITING BODY",font=fm,fill=white)
+  else:
+   for cx,cy in [(112,226),(262,226),(412,226)]:
+    d.ellipse((cx-37,cy-37,cx+37,cy+37),fill=(78,116,96,255),outline=aqua,width=4)
+   d.line((152,225,220,225),fill=CC,width=5)
+   d.line((302,225,370,225),fill=CC,width=5)
+   d.text((50,111),"SPORES   →   INFECTION   →   GROWTH",font=fs,fill=white)
  label(img,header,lines,credit)
  img.save(ASSETS/(name+".png"))
  return ASSETS/(name+".png")
@@ -148,7 +177,7 @@ assert len(timeline)==len(set(t["file"] for t in timeline))
 (OUT/"OVERLAY_TIMELINE.json").write_text(json.dumps(timeline,indent=2))
 (OUT/"REAL_PHOTO_CREDITS.txt").write_text(
  "STRANGE, BUT VERIFIED — SCIENTIFIC PICTURE-IN-PICTURE PHOTO + SCHEMATIC OVERLAYS\n"
- "Real photographs:\n"
+ "Research photograph source references (included only if downloaded successfully):\n"
  +"\n".join(f"{name}: {license} | {url}" for name,(filename,license,url) in photo_sources.items())
  +"\n\nThese images are real ant–fungus photographs, not generated. Displayed at "
  "small size over continuous forest footage and modified by crop/caption/card frame.\n"
@@ -168,7 +197,7 @@ d.rectangle((0,775,1920,1080),fill=(16,28,24))
 d.text((80,820),"CONTINUOUS NATURE FOOTAGE — sample only",font=ImageFont.truetype(BOLD,48),fill=white)
 preview.paste(Image.open(p2), (1200,100),Image.open(p2))
 preview.save(OUT/"EXAMPLE_PICTURE_IN_PICTURE_FRAME.jpg",quality=91)
-print("CARD PACK:",len(timeline),"PIP overlays and 3 authentic photos.",flush=True)
+print("CARD PACK:",len(timeline),"PIP overlays; real photos embedded:",len(loaded),"; original schematics:",6-len(loaded),flush=True)
 # Render baseline DEMONSTRATION to show correct 4K-like picture-in-picture
 # composition. This is V8 footage, NOT user's locally authored V9 master.
 if not FILM.exists():
