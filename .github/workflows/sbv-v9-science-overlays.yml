@@ -4,7 +4,7 @@ on:
     branches: [sbv-zombie-ant-v9-scientific-overlays-20261028]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   overlays:
     runs-on: ubuntu-latest
