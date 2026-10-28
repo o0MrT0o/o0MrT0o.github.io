@@ -1,0 +1,62 @@
+name: SBV V10 - Authentic science picture in picture overlay graphics
+on:
+  push:
+    branches: [sbv-zombie-ant-v10-science-overlay-cards-20261028]
+    paths:
+      - sbv_v10_science_overlay_cards.py
+      - .github/workflows/sbv-v10-science-overlays.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  overlays:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare Pillow and portable FFmpeg
+        run: |
+          set -e
+          python3 -m pip install -q pillow imageio-ffmpeg
+          python3 - <<'PY'
+          from pathlib import Path
+          import imageio_ffmpeg,os
+          folder=Path("portable_bin").resolve()
+          folder.mkdir(exist_ok=True)
+          (folder/"ffmpeg").symlink_to(Path(imageio_ffmpeg.get_ffmpeg_exe()).resolve())
+          with open(os.environ["GITHUB_PATH"],"a") as f:f.write(str(folder)+"\n")
+          PY
+          python3 -m py_compile sbv_v10_science_overlay_cards.py
+      - name: Download verified full-bleed nature master V8 for demonstration only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p baseline
+          gh run download 40461898128 --repo "${{ github.repository }}" -n SBV_ZOMBIE_ANT_V8_FULL_SCREEN_FOREST_NO_LAB_1080P -D baseline
+          test -s baseline/SBV_ZOMBIE_ANT_V8_FOREST_ONLY_NO_LAB_NO_REPEATS.mp4
+      - name: Create six factual research-image and schematic overlays with accurate attribution
+        run: python3 sbv_v10_science_overlay_cards.py
+      - name: Upload six transparent cards, timeline JSON and V8 preview movie
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V10_SCIENTIFIC_OVERLAY_CARDS_AND_VISUAL_DEMO
+          path: overlay_delivery/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish PNG overlays for use on the actual V9 master
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create sbv-zombie-ant-v10-scientific-overlays-20261028 \
+            overlay_delivery/*.png overlay_delivery/*.json \
+            overlay_delivery/REAL_PHOTO_CREDITS.txt \
+            overlay_delivery/EXAMPLE_PICTURE_IN_PICTURE_FRAME.jpg \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "Strange, But Verified — Scientific photo PIP overlays for Zombie Ants V9" \
+            --notes "Six independent research photo / accurate schematics PNG overlay assets, 630x438, transparent outside 12.5% of frame and positioned at x1200,y100 on 1920x1080 continuous moving nature footage. One appearance per image. No fictional infected ant photos. REAL-photo credits included; intended for local V9 final-master picture-in-picture timeline. Full demo movie is based on verified V8 only and lives in action artifact, never mislabelled V9."
