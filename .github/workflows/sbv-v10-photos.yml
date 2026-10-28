@@ -1,0 +1,25 @@
+name: SBV V10 - Download Attribution-Licensed Genuine Zombie Ant Images
+on:
+  push:
+    branches: [sbv-zombie-ant-v10-verified-photo-overlays-20261028]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  photo_sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare image verification
+        run: |
+          python3 -m pip install -q pillow
+          python3 -m py_compile sbv_v10_acquire_photos.py
+      - name: Fetch actual CC-BY 2.5 and CC-BY 4.0 Wikimedia image originals
+        run: python3 sbv_v10_acquire_photos.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SBV_V10_AUTHENTIC_OPHIOCORDYCEPS_PHOTOS_WITH_CREDITS
+          path: v10_stills/
+          retention-days: 7
+          if-no-files-found: error
