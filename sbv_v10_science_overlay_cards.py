@@ -200,6 +200,9 @@ preview.save(OUT/"EXAMPLE_PICTURE_IN_PICTURE_FRAME.jpg",quality=91)
 print("CARD PACK:",len(timeline),"PIP overlays; real photos embedded:",len(loaded),"; original schematics:",6-len(loaded),flush=True)
 # Render baseline DEMONSTRATION to show correct 4K-like picture-in-picture
 # composition. This is V8 footage, NOT user's locally authored V9 master.
+if os.getenv("SBV_SKIP_DEMO")=="1":
+ print("ALL PNG OVERLAY ASSETS COMPLETE; demonstration video skipped.",flush=True)
+ exit()
 if not FILM.exists():
  print("NO DEMO VIDEO AVAILABLE, OVERLAYS READY",flush=True)
  exit()
