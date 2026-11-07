@@ -27,8 +27,8 @@ PHRASES=[
  "Nature built a seed cannon."
 ]
 VISUALS=[
- (S3,0.25,.50,'THE EXPLOSION'),       # actual fruit is visibly ejecting from the first frame
- (S2,.15,.19,'THE PLANT'),            # real green plant filmed over days
+ (S3,0.75,.50,'THE EXPLOSION'),       # actual fruit is visibly ejecting from the first frame
+ (S2,.15,.74,'THE PLANT'),            # real green plant filmed over days
  (S1,15.2,.50,'INSIDE THE FRUIT'),   # CT seeds become visible
  (S3,7.05,.51,'THE SEEDS'),          # continuing original jet, no overlap with opener
  (S3,-1.00,.51,'30 MILLISECONDS'),   # time assigned dynamically after phrase 3
@@ -76,7 +76,7 @@ def captions(sections,total):
  def add(start,end,style,text,layer=0):
   if end>start:lines.append(f'Dialogue: {layer},{fmt(start)},{fmt(end)},{style},,0,0,0,,{text}')
  add(0,total,'Brand',r'{\an7\pos(36,87)}STRANGE, BUT VERIFIED  /  PNAS 2024')
- add(0,min(2.6,total),'Hook',r'{\an5\pos(540,440)\fad(50,110)}THIS IS A PLANT.',layer=0)
+ add(0,min(2.6,total),'Hook',r'{\an5\pos(540,440)\fad(0,110)}THIS IS A PLANT.',layer=0)
  yellow={'explosion','plant','cucumber','pressure','detaches','seeds','forty-five','miles','hour','thirty','milliseconds','ten','metres','cameras','cannon'}
  for sec in sections:
   words=sec['text'].split();groups=[];part=[]
@@ -94,7 +94,7 @@ def captions(sections,total):
     if w.lower().strip('.,!?:') in yellow:colored.append(r'{\c&H0000D8FF&}'+w+r'{\c&H00FFFFFF&}')
     else:colored.append(w)
    txt=r'{\an5\pos(540,1210)\fad(35,60)}'+' '.join(colored)
-   add(max(0,cursor-.025),min(total,nxt+.08),'Caps',txt,1)
+   add(max(0,cursor),min(total,nxt),'Caps',txt,1)
    cursor=nxt
  stats=[(3,'45 MPH / 20 M/S'),(4,'0.030 SECONDS'),(5,'UP TO 10 METRES')]
  for idx,label in stats:
@@ -149,7 +149,7 @@ def main():
  # Ensure all original source intervals are unique and valid; no reuse of exact frames.
  v=VISUALS.copy()
  v[4]=(S3,7.05+(secs[3]['end']-secs[3]['start'])+.16,.51,'30 MILLISECONDS')
- v[7]=(S3,.25+(secs[0]['end']-secs[0]['start'])+.18,.51,'THE SEED CANNON')
+ v[7]=(S3,.75+(secs[0]['end']-secs[0]['start'])+.18,.51,'THE SEED CANNON')
  ppath=[];edl=[];ranges={}
  for i,(source,st,focus,label) in enumerate(v):
   sec=secs[i];duration=round(sec['end']-sec['start'],5)
