@@ -76,7 +76,7 @@ def captions(sections,total):
  def add(start,end,style,text,layer=0):
   if end>start:lines.append(f'Dialogue: {layer},{fmt(start)},{fmt(end)},{style},,0,0,0,,{text}')
  add(0,total,'Brand',r'{\an7\pos(36,87)}STRANGE, BUT VERIFIED  /  PNAS 2024')
- add(0,min(2.6,total),'Hook',r'{\an5\pos(540,440)\fad(50,110)}IT\'S A PLANT.',layer=0)
+ add(0,min(2.6,total),'Hook',r'{\an5\pos(540,440)\fad(50,110)}THIS IS A PLANT.',layer=0)
  yellow={'explosion','plant','cucumber','pressure','detaches','seeds','forty-five','miles','hour','thirty','milliseconds','ten','metres','cameras','cannon'}
  for sec in sections:
   words=sec['text'].split();groups=[];part=[]
