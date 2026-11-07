@@ -48,7 +48,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release create sbv-exploding-cucumber-20261107-v3 \
+          gh release create sbv-exploding-cucumber-20261107-v4 \
             ecballium_output/SBV_EXPLODING_CUCUMBER_KOKORO_FINAL.mp4 \
             ecballium_output/SBV_ECBALLIUM_KOKORO_AF_HEART.wav \
             ecballium_output/QA.json \
@@ -57,5 +57,5 @@ jobs:
             ecballium_output/NARRATION.txt \
             --repo '${{ github.repository }}' \
             --target '${{ github.sha }}' \
-            --title 'Strange But Verified - Exploding Cucumber - 9x16 Kokoro Master V3 - Two-Line Source Clean Hook' \
+            --title 'Strange But Verified - Exploding Cucumber - 9x16 Kokoro Master V4 - No Freeze Final QA' \
             --notes 'Educational documentary built exclusively from Box et al 2024 PNAS CC BY 4.0 original research movies S1 S2 S3. Narration Kokoro-82M af_heart, 0.88. Vertical FFmpeg H264/AAC, captions, original sound, full QA. Not uploaded to TikTok or YouTube.'

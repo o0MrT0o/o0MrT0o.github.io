@@ -18,8 +18,8 @@ for p in (S1,S2,S3):
  assert p.exists() and p.stat().st_size>1500000,'MISSING VERIFIED AUTHENTIC VIDEO '+str(p)
 PHRASES=[
  "This thing fires seeds at forty-five miles per hour.",
- "And somehow, it's a plant.",
- "Meet the squirting cucumber. Pressure builds inside its fruit as it ripens.",
+ "It's a plant called the squirting cucumber.",
+ "Pressure builds as its fruit ripens.",
  "Then the fruit detaches, launching seeds through the air.",
  "The entire launch takes just thirty milliseconds.",
  "Some seeds travel as far as ten metres.",
@@ -29,7 +29,7 @@ PHRASES=[
 VISUALS=[
  (S3,2.10,.50,'THE EXPLOSION'),       # actual fruit is visibly ejecting from the first frame
  (S2,.15,.74,'THE PLANT'),            # real green plant filmed over days
- (S1,15.2,.50,'INSIDE THE FRUIT'),   # CT seeds become visible
+ (S1,20.8,.50,'INSIDE THE FRUIT'),   # CT seeds become visible
  (S3,7.05,.51,'THE SEEDS'),          # continuing original jet, no overlap with opener
  (S3,-1.00,.51,'30 MILLISECONDS'),   # time assigned dynamically after phrase 3
  (S2,3.05,.74,'10 METRES'),          # green mature fruit
@@ -134,8 +134,10 @@ def clip(src,start,duration,i,focus,label):
  p=WK/f'{i:02d}.mp4'
  # Zoom and crop while retaining real footage, no generated filler.
  # Source S3 is already vertical; S1/S2 subject tracking is centered on crop focus.
+ # Small documentary pan on CT sections, keeping original scientific frames moving without fabricated visuals.
+ crop_x=(f'(iw-1080)*{focus:.4f}+24*sin(n/19)' if src==S1 else f'(iw-1080)*{focus:.4f}')
  filt=(f'fps=30,scale=-2:1920:flags=lanczos,'
-       f'crop=1080:1920:(iw-1080)*{focus:.4f}:0,'
+       f'crop=1080:1920:{crop_x}:0,'
        f'eq=contrast=1.055:saturation=1.05,format=yuv420p')
  run(['ffmpeg','-hide_banner','-v','error','-y','-ss',f'{start:.4f}',
       '-i',src,'-t',f'{duration:.4f}','-an','-vf',filt,'-r',FPS,
@@ -197,13 +199,18 @@ def main():
  _,blackqa=run(['ffmpeg','-hide_banner','-nostats','-i',mp4,
    '-vf','blackdetect=d=0.14:pix_th=0.08','-an','-f','null','-'])
  black=[line.strip() for line in blackqa.splitlines() if 'black_start:' in line]
+ _,freezeqa=run(['ffmpeg','-hide_banner','-nostats','-i',mp4,
+   '-vf','freezedetect=n=-57dB:d=0.7','-an','-f','null','-'])
+ freezes=[line.strip() for line in freezeqa.splitlines() if 'lavfi.freezedetect.freeze_start:' in line]
+ assert not freezes,('Detected frozen picture >= 0.7s: ',freezes)
+ assert not black,('Detected black picture >= 0.14s',black)
  qa={'status':'PASS','file':mp4.name,'duration_sec':dur,'width':W,'height':H,'fps':FPS,
      'size_bytes':mp4.stat().st_size,
      'voice':'Kokoro-82M v1.0 af_heart, en-US speed 0.88','voice_sec':total,
      'video_codec':va['codec_name'],'audio_codec':au['codec_name'],
      'source':'Box, Moulton, Vella et al (2024) PNAS e2410420121; Movie S1 S2 S3; CC BY 4.0',
      'all_video_authentic':True,'scene_repetitions':0,'source_frame_overlap_count':0,
-     'full_decode':'PASS','black_events':black,
+     'full_decode':'PASS','black_events':black,'freeze_events':freezes,
      'overlay_audit':{'header_rows':2,'header_row1':'STRANGE, BUT VERIFIED','header_row2':'SOURCE: PNAS  |  BOX ET AL. (2024)',
       'upper_central_overlays':0,'main_captions_y':1210,'hook_caption':'THIS THING FIRES SEEDS / AT 45 MPH',
       'launch_source_in_seconds':2.10,'ending_uses_unique_prelaunch_frames':True},
