@@ -290,7 +290,14 @@ def main():
  for i,t in enumerate(times):
   if t>dur-.08:t=dur-.09
   frame=WK/f'frame_{i}.jpg'
+  # Use actual video-stream duration, not potentially longer AAC container duration.
+  video_duration=float(v.get('duration',dur))
+  t=min(t,max(.10,video_duration-.50))
   run(['ffmpeg','-hide_banner','-v','error','-y','-ss',str(t),'-i',mp4,'-frames:v','1',frame])
+  if not frame.exists():
+   t=max(.05,t-.75)
+   run(['ffmpeg','-hide_banner','-v','error','-y','-ss',str(t),'-i',mp4,'-frames:v','1',frame])
+  assert frame.exists(),('contact frame unavailable',i,t,video_duration,dur)
   with Image.open(frame) as im:
    im.thumbnail((265,473));x=(i%4)*270;y=(i//4)*505;contact.paste(im,(x+(270-im.width)//2,y))
    d.text((x+6,y+476),f'{t:.2f}s',fill='#FFFFFF')
