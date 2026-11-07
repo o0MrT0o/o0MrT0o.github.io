@@ -1,0 +1,59 @@
+name: SBV Exploding Cucumber V5 - NO REPEATED RECORDINGS
+on:
+  push:
+    branches: [sbv-exploding-cucumber-kokoro-20261107]
+    paths:
+      - 'sbv_exploding_cucumber_v5_norepeats.py'
+      - '.github/workflows/sbv-exploding-cucumber-v5-norepeats.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  edit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Prepare Kokoro, FFmpeg and exact scientific source recorder
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-montserrat
+          python -m pip install -q 'kokoro-onnx==0.6.1' 'soundfile>=0.12,<1' 'numpy<3' 'scipy>=1.10,<2' 'pillow>=10,<13' requests espeakng-loader
+          mkdir -p models
+          curl -fLSs --retry 5 --retry-delay 4 --max-time 500 https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/kokoro-v1.0.onnx -o models/kokoro-v1.0.onnx
+          curl -fLSs --retry 5 --retry-delay 4 --max-time 500 https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/voices-v1.0.bin -o models/voices-v1.0.bin
+          echo 'beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a  models/kokoro-v1.0.onnx' | sha256sum --check
+          echo 'bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d  models/voices-v1.0.bin' | sha256sum --check
+      - name: Assemble 4 distinct actual footage recordings + 2 distinct archive photos, no source reused
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -u sbv_exploding_cucumber_v5_norepeats.py
+      - name: Upload final MP4 and unique-source provenance audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_ECBALLIUM_V5_NO_REPEATED_RECORDINGS
+          path: ecballium_v5_final/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Release a directly downloadable MP4 (no social posting)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create sbv-exploding-cucumber-20261107-v5-norepeats \
+            ecballium_v5_final/SBV_EXPLODING_CUCUMBER_V5_NO_REPEATED_SHOTS.mp4 \
+            ecballium_v5_final/QA_NO_REPEATS.json \
+            ecballium_v5_final/CONTACT_SHEET.jpg \
+            ecballium_v5_final/FULL_CREDITS_LICENSES.txt \
+            ecballium_v5_final/KOKORO_AF_HEART_NARRATION.wav \
+            --repo '${{ github.repository }}' --target '${{ github.sha }}' \
+            --title 'Strange But Verified - Exploding Cucumber - V5 Zero Repeated Footage' \
+            --notes 'Original V4 launch hook preserved. V5 uses four separate real video recordings (Oxford 2024 S3, S2, S1; independent Gorges et al 2025) each once, plus two different verified archival botany photos with subtle labeled editorial Ken Burns. Full credits and QA. No content posted to social networks.'
