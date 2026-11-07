@@ -25,10 +25,16 @@ PHRASES=[
  "Still alive."
 ]
 SHOTS=[
- ('a',2.0,'tight',2.45,.50),('b',5.0,'tight',2.4,.53),('a',14.0,'tight',2.5,.49),
- ('b',18.0,'tight',2.65,.52),('a',26.0,'wide',2.55,.50),('b',34.0,'tight',2.7,.48),
- ('a',38.0,'tight',2.65,.55),('b',49.0,'wide',2.6,.50),('a',52.5,'tight',2.6,.54),
- ('b',68.0,'tight',3.3,.51)
+ ('b',69.0,'tight',3.0,.51),
+ ('a',14.0,'tight',2.45,.49),
+ ('b',5.0,'tight',2.4,.53),
+ ('a',26.0,'wide',2.5,.50),
+ ('b',18.0,'tight',2.55,.52),
+ ('a',38.0,'tight',2.65,.55),
+ ('b',34.0,'tight',2.7,.48),
+ ('a',52.5,'tight',3.1,.54),
+ ('b',49.0,'wide',2.7,.50),
+ ('a',44.5,'tight',2.6,.52)
 ]
 def run(args):
  p=subprocess.run([str(v) for v in args],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)

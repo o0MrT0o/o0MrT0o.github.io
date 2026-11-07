@@ -46,7 +46,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release create sbv-zombie-snail-20261107-v1 \
+          gh release create sbv-zombie-snail-20261107-v2 \
             snail_output/SBV_ZOMBIE_SNAIL_KOKORO_TIKTOK_FINAL.mp4 \
             snail_output/SBV_ZOMBIE_SNAIL_KOKORO_AF_HEART.wav \
             snail_output/SOURCES_AND_LICENSES.txt \
@@ -54,5 +54,5 @@ jobs:
             snail_output/CONTACT_SHEET.jpg \
             --repo '${{ github.repository }}' \
             --target '${{ github.sha }}' \
-            --title 'Strange But Verified - Zombie Snail - Kokoro 9x16' \
+            --title 'Strange But Verified - Zombie Snail - Kokoro 9x16 V2 parasite-first' \
             --notes 'Actual original licensed Leucochloridium video, vertical documentary cut with Kokoro-82M af_heart speed 0.88, subtitled, CC BY-SA 4.0 licensed adaptation. See full credits. Not posted on TikTok or YouTube.'
