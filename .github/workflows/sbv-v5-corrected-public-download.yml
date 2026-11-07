@@ -1,0 +1,63 @@
+name: Publish corrected V5 full-length video for mobile download
+on:
+  push:
+    branches: [sbv-exploding-cucumber-kokoro-20261107]
+    paths:
+      - '.github/workflows/sbv-v5-corrected-public-download.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  share:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch VALIDATED corrected video from Actions artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p corrected
+          gh run download 42420276749 --name SBV_ECBALLIUM_V5_NO_REPEATED_RECORDINGS -D corrected --repo '${{ github.repository }}'
+          find corrected -maxdepth 3 -type f -printf '%p %s bytes\n'
+          F="$(find corrected -type f -name 'SBV_EXPLODING_CUCUMBER_V5_NO_REPEATED_SHOTS.mp4' | head -1)"
+          test -n "$F"
+          mv "$F" ./EXPLODING_CUCUMBER_V5_CORRECTED_FULL_1080P.mp4
+      - name: Make small Android-ready MP4 and verify both streams
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python3 - <<'PY'
+          import json,subprocess
+          p='EXPLODING_CUCUMBER_V5_CORRECTED_FULL_1080P.mp4'
+          o=subprocess.check_output(['ffprobe','-v','error','-show_streams','-of','json',p])
+          s=json.loads(o)['streams']
+          video=next(x for x in s if x['codec_type']=='video')
+          audio=next(x for x in s if x['codec_type']=='audio')
+          vd=float(video['duration']);ad=float(audio['duration'])
+          assert vd>18 and abs(vd-ad)<.20,(vd,ad)
+          print('VALID full-length picture',vd,'and voice',ad)
+          PY
+          ffmpeg -hide_banner -loglevel error -y \
+            -i EXPLODING_CUCUMBER_V5_CORRECTED_FULL_1080P.mp4 \
+            -vf scale=720:1280:flags=lanczos -c:v libx264 -preset veryfast -crf 27 \
+            -r 30 -pix_fmt yuv420p -c:a aac -b:a 112k -movflags +faststart \
+            EXPLODING_CUCUMBER_V5_MOBILE_720P.mp4
+          test -s EXPLODING_CUCUMBER_V5_MOBILE_720P.mp4
+      - name: Publish CORRECTED publicly downloadable MP4s to brand-new release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create sbv-exploding-cucumber-20261107-v5-fixed-mobile \
+            EXPLODING_CUCUMBER_V5_CORRECTED_FULL_1080P.mp4 \
+            EXPLODING_CUCUMBER_V5_MOBILE_720P.mp4 \
+            --repo '${{ github.repository }}' --target '${{ github.sha }}' \
+            --title 'Exploding Cucumber V5 CORRECTED — Full Length MP4 + Mobile' \
+            --notes 'Corrected FULL-LENGTH video: 18.7 seconds picture and matching audio. Six unique image sources without repetitions. The earlier V5 GitHub release is withdrawn as broken; use this corrected release. 1080x1920 MP4 and mobile-friendly 720x1280 MP4; published for download only, not to social channels.'
