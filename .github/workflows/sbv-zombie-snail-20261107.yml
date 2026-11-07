@@ -1,0 +1,58 @@
+name: SBV Zombie Snail Kokoro FFmpeg 9x16
+on:
+  push:
+    branches: [sbv-zombie-snail-kokoro-20261107]
+    paths:
+      - 'sbv_zombie_snail_20261107.py'
+      - '.github/workflows/sbv-zombie-snail-20261107.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Prepare FFmpeg, Montserrat, and Kokoro-82M
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-montserrat
+          python -m pip install -q 'kokoro-onnx==0.6.1' 'soundfile>=0.12,<1' 'numpy<3' 'scipy>=1.10,<2' 'pillow>=10,<13' espeakng-loader
+          mkdir -p models
+          curl -fLSs --retry 5 --retry-delay 4 --max-time 500 https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/kokoro-v1.0.onnx -o models/kokoro-v1.0.onnx
+          curl -fLSs --retry 5 --retry-delay 4 --max-time 500 https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/voices-v1.0.bin -o models/voices-v1.0.bin
+          echo 'beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a  models/kokoro-v1.0.onnx' | sha256sum --check
+          echo 'bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d  models/voices-v1.0.bin' | sha256sum --check
+      - name: Render authentic wildlife documentary with Kokoro and do full QC
+        run: |
+          set -euo pipefail
+          python -u sbv_zombie_snail_20261107.py
+      - name: Export video, full attribution, QA and preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_ZOMBIE_SNAIL_KOKORO_FINAL
+          path: snail_output/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish direct video file (not to TikTok or YouTube)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create sbv-zombie-snail-20261107-v1 \
+            snail_output/SBV_ZOMBIE_SNAIL_KOKORO_TIKTOK_FINAL.mp4 \
+            snail_output/SBV_ZOMBIE_SNAIL_KOKORO_AF_HEART.wav \
+            snail_output/SOURCES_AND_LICENSES.txt \
+            snail_output/QA.json \
+            snail_output/CONTACT_SHEET.jpg \
+            --repo '${{ github.repository }}' \
+            --target '${{ github.sha }}' \
+            --title 'Strange But Verified - Zombie Snail - Kokoro 9x16' \
+            --notes 'Actual original licensed Leucochloridium video, vertical documentary cut with Kokoro-82M af_heart speed 0.88, subtitled, CC BY-SA 4.0 licensed adaptation. See full credits. Not posted on TikTok or YouTube.'
