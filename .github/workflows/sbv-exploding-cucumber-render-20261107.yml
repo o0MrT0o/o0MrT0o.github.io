@@ -1,0 +1,61 @@
+name: SBV Exploding Cucumber Kokoro Documentary 9x16
+on:
+  push:
+    branches: [sbv-exploding-cucumber-kokoro-20261107]
+    paths:
+      - 'sbv_exploding_cucumber_20261107.py'
+      - '.github/workflows/sbv-exploding-cucumber-render-20261107.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Prepare true Kokoro voice, Montserrat captions and FFmpeg
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-montserrat
+          python -m pip install -q 'kokoro-onnx==0.6.1' 'soundfile>=0.12,<1' 'numpy<3' 'scipy>=1.10,<2' 'pillow>=10,<13' requests espeakng-loader
+          mkdir -p models
+          curl -fLSs --retry 5 --retry-delay 4 --max-time 500 https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/kokoro-v1.0.onnx -o models/kokoro-v1.0.onnx
+          curl -fLSs --retry 5 --retry-delay 4 --max-time 500 https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/voices-v1.0.bin -o models/voices-v1.0.bin
+          echo 'beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a  models/kokoro-v1.0.onnx' | sha256sum --check
+          echo 'bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d  models/voices-v1.0.bin' | sha256sum --check
+      - name: Real footage edit, Kokoro timing, subtitles, original sound and full-decode QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -u sbv_exploding_cucumber_20261107.py
+      - name: Export master MP4, high quality preview, voice, license evidence and QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_EXPLODING_CUCUMBER_KOKORO_FINAL
+          path: ecballium_output/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish directly downloadable master video and credits, not a social upload
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create sbv-exploding-cucumber-20261107-v1 \
+            ecballium_output/SBV_EXPLODING_CUCUMBER_KOKORO_FINAL.mp4 \
+            ecballium_output/SBV_ECBALLIUM_KOKORO_AF_HEART.wav \
+            ecballium_output/QA.json \
+            ecballium_output/CONTACT_SHEET.jpg \
+            ecballium_output/SOURCES_AND_LICENSES.txt \
+            ecballium_output/NARRATION.txt \
+            --repo '${{ github.repository }}' \
+            --target '${{ github.sha }}' \
+            --title 'Strange But Verified - Exploding Cucumber - 9x16 Kokoro Master' \
+            --notes 'Educational documentary built exclusively from Box et al 2024 PNAS CC BY 4.0 original research movies S1 S2 S3. Narration Kokoro-82M af_heart, 0.88. Vertical FFmpeg H264/AAC, captions, original sound, full QA. Not uploaded to TikTok or YouTube.'
