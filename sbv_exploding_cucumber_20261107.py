@@ -17,17 +17,17 @@ S3=D/'pnas.2410420121.sm03.avi' # original 8600-fps research, vertical 480x768 1
 for p in (S1,S2,S3):
  assert p.exists() and p.stat().st_size>1500000,'MISSING VERIFIED AUTHENTIC VIDEO '+str(p)
 PHRASES=[
- "That looks like an explosion. But it's a plant.",
- "Meet the squirting cucumber.",
- "Inside the fruit, pressure builds as it ripens.",
- "Then it detaches, shooting seeds at forty-five miles per hour.",
- "The whole launch takes just thirty milliseconds.",
+ "This thing fires seeds at forty-five miles per hour.",
+ "And somehow, it's a plant.",
+ "Meet the squirting cucumber. Pressure builds inside its fruit as it ripens.",
+ "Then the fruit detaches, launching seeds through the air.",
+ "The entire launch takes just thirty milliseconds.",
  "Some seeds travel as far as ten metres.",
- "Researchers needed ultra-fast cameras to see how it works.",
- "Nature built a seed cannon."
+ "Scientists needed high-speed cameras to see it clearly.",
+ "A literal seed cannon."
 ]
 VISUALS=[
- (S3,0.75,.50,'THE EXPLOSION'),       # actual fruit is visibly ejecting from the first frame
+ (S3,2.10,.50,'THE EXPLOSION'),       # actual fruit is visibly ejecting from the first frame
  (S2,.15,.74,'THE PLANT'),            # real green plant filmed over days
  (S1,15.2,.50,'INSIDE THE FRUIT'),   # CT seeds become visible
  (S3,7.05,.51,'THE SEEDS'),          # continuing original jet, no overlap with opener
@@ -69,16 +69,18 @@ def captions(sections,total):
  'WrapStyle: 2','ScaledBorderAndShadow: yes','','[V4+ Styles]',
  'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
  'Style: Caps,Montserrat,72,&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,-1,0,0,0,100,100,0.2,0,1,5,2,5,65,65,700,1',
- 'Style: Hook,Montserrat,78,&H0017D5FF,&H0017D5FF,&H00000000,&H90000000,-1,0,0,0,100,100,0,0,1,6,2,5,65,65,1250,1',
- 'Style: Brand,Montserrat,24,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,2,0,7,20,20,20,1',
- 'Style: Stat,Montserrat,71,&H0000D8FF,&H0000D8FF,&H00000000,&H90000000,-1,0,0,0,100,100,0,0,1,5,2,5,70,70,1330,1',
+ 'Style: Brand,Montserrat,34,&H00FFFFFF,&H00FFFFFF,&H00000000,&H70000000,-1,0,0,0,100,100,0,0,1,2.8,0,7,20,20,20,1',
+ 'Style: Source,Montserrat,23,&H00EEEEEE,&H00EEEEEE,&H00000000,&H80000000,-1,0,0,0,100,100,0.5,0,1,2.2,0,7,20,20,20,1',
  '','[Events]','Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text']
  def add(start,end,style,text,layer=0):
   if end>start:lines.append(f'Dialogue: {layer},{fmt(start)},{fmt(end)},{style},,0,0,0,,{text}')
- add(0,total,'Brand',r'{\an7\pos(36,87)}STRANGE, BUT VERIFIED  /  PNAS 2024')
- add(0,min(2.6,total),'Hook',r'{\an5\pos(540,440)\fad(0,110)}THIS IS A PLANT.',layer=0)
- yellow={'explosion','plant','cucumber','pressure','detaches','seeds','forty-five','miles','hour','thirty','milliseconds','ten','metres','cameras','cannon'}
- for sec in sections:
+ add(0,total,'Brand',r'{\an7\pos(40,66)}STRANGE, BUT VERIFIED')
+ add(0,total,'Source',r'{\an7\pos(40,110)}SOURCE: PNAS  |  BOX ET AL. (2024)')
+ yellow={'plant','cucumber','pressure','detaches','seeds','forty-five','miles','hour','thirty','milliseconds','ten','metres','cameras','cannon','fruit','launching','high-speed'}
+ for idx,sec in enumerate(sections):
+  if idx==0:
+   add(0,sec['vo_end'],'Caps',r'{\an5\pos(540,1220)\fad(0,75)}THIS THING FIRES SEEDS\N{\c&H0000D8FF&}AT 45 MPH{\c&H00FFFFFF&}',1)
+   continue
   words=sec['text'].split();groups=[];part=[]
   for w in words:
    part.append(w)
@@ -96,11 +98,12 @@ def captions(sections,total):
    txt=r'{\an5\pos(540,1210)\fad(35,60)}'+' '.join(colored)
    add(max(0,cursor),min(total,nxt),'Caps',txt,1)
    cursor=nxt
- stats=[(3,'45 MPH / 20 M/S'),(4,'0.030 SECONDS'),(5,'UP TO 10 METRES')]
- for idx,label in stats:
-  st=sections[idx]['start']+.2
-  en=min(sections[idx]['end']-.12,st+1.75)
-  add(st,en,'Stat',r'{\an5\pos(540,440)\fad(90,180)}'+label,2)
+ # No centrally positioned upper hook/stat overlays: reserved top area is only the 2-line source credit.
+ caption_events=[line for line in lines if line.startswith('Dialogue: ')]
+ rendered_styles=[line.split(',')[3] for line in caption_events]
+ assert rendered_styles.count('Brand')==1 and rendered_styles.count('Source')==1
+ assert all(style in ('Brand','Source','Caps') for style in rendered_styles), rendered_styles
+ assert len(caption_events)>=11
  p.write_text('\n'.join(lines),encoding='utf-8')
  return p
 def bed(sections,total):
@@ -149,7 +152,11 @@ def main():
  # Ensure all original source intervals are unique and valid; no reuse of exact frames.
  v=VISUALS.copy()
  v[4]=(S3,7.05+(secs[3]['end']-secs[3]['start'])+.16,.51,'30 MILLISECONDS')
- v[7]=(S3,.75+(secs[0]['end']-secs[0]['start'])+.18,.51,'THE SEED CANNON')
+ # Visual loop: show fruit just BEFORE the launch as the final shot; the next replay begins at the explosive peak.
+ last_d=secs[7]['end']-secs[7]['start']
+ last_in=2.10-last_d-.07
+ assert last_in>.06,('Kokoro last phrase too long to preserve continuous natural-loop footage',last_d)
+ v[7]=(S3,last_in,.51,'THE SEED CANNON / PRE-LAUNCH LOOP')
  ppath=[];edl=[];ranges={}
  for i,(source,st,focus,label) in enumerate(v):
   sec=secs[i];duration=round(sec['end']-sec['start'],5)
@@ -197,6 +204,9 @@ def main():
      'source':'Box, Moulton, Vella et al (2024) PNAS e2410420121; Movie S1 S2 S3; CC BY 4.0',
      'all_video_authentic':True,'scene_repetitions':0,'source_frame_overlap_count':0,
      'full_decode':'PASS','black_events':black,
+     'overlay_audit':{'header_rows':2,'header_row1':'STRANGE, BUT VERIFIED','header_row2':'SOURCE: PNAS  |  BOX ET AL. (2024)',
+      'upper_central_overlays':0,'main_captions_y':1210,'hook_caption':'THIS THING FIRES SEEDS / AT 45 MPH',
+      'launch_source_in_seconds':2.10,'ending_uses_unique_prelaunch_frames':True},
      'audio_loudness_summary':audioqa[-2100:],
      'edl':edl}
  (OUT/'QA.json').write_text(json.dumps(qa,indent=2))
