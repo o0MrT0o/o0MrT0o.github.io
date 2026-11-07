@@ -227,9 +227,23 @@ def main():
     'in':src.get('in',0),'out':src.get('in',0)+length,'duration':length,
     'position':sc['start'],'voice':sc['phrase']})
  assert len(set(x['file'] for x in timeline))==len(timeline),'Repeated source video detected'
- concat=WK/'concat.txt';concat.write_text(''.join("file '"+str(x.resolve())+"'\n" for x in segments))
+ # Homogeneous video concat across all 6 segments. Demuxer copy lost the last photo segments
+ # because their MP4 timescale differs; use filter_complex concat with reset PTS.
  movie=WK/'unique_visuals.mp4'
- run(['ffmpeg','-hide_banner','-v','error','-y','-f','concat','-safe','0','-i',concat,'-c','copy',movie])
+ inputs=[]
+ filters=[]
+ for clip_i,clip_path in enumerate(segments):
+  inputs.extend(['-i',clip_path])
+  filters.append(f'[{clip_i}:v]fps=30,settb=1/30000,setpts=PTS-STARTPTS,setsar=1[v{clip_i}]')
+ movie_filter=';'.join(filters)+';'+''.join(f'[v{i}]' for i in range(len(segments)))+f'concat=n={len(segments)}:v=1:a=0,format=yuv420p[all]'
+ run(['ffmpeg','-hide_banner','-v','error','-y',*inputs,
+      '-filter_complex',movie_filter,'-map','[all]','-an',
+      '-c:v','libx264','-preset','veryfast','-crf','21',
+      '-pix_fmt','yuv420p','-r','30','-video_track_timescale','30000',movie])
+ movie_info=probe(movie)
+ moving_stream=next(x for x in movie_info['streams'] if x['codec_type']=='video')
+ visible_seconds=float(moving_stream.get('duration') or movie_info['format']['duration'])
+ assert abs(visible_seconds-total)<.22,('The entire unique visual sequence is not present',visible_seconds,total)
  ambience=ambient(total)
  mp4=OUT/'SBV_EXPLODING_CUCUMBER_V5_NO_REPEATED_SHOTS.mp4'
  fa=("[1:a]aresample=48000,highpass=f=85,volume=1.18,acompressor=threshold=0.14:ratio=1.8:attack=10:release=130[v];"
@@ -243,7 +257,10 @@ def main():
  run(['ffmpeg','-hide_banner','-v','error','-xerror','-i',mp4,'-f','null','-'])
  meta=probe(mp4);dur=float(meta['format']['duration'])
  v=next(x for x in meta['streams'] if x['codec_type']=='video')
- assert (v['width'],v['height'])==(1080,1920) and abs(dur-total)<.6 and mp4.stat().st_size>2500000
+ video_sec=float(v.get('duration') or dur)
+ assert (v['width'],v['height'])==(1080,1920) and abs(dur-total)<.28 and mp4.stat().st_size>2500000
+ assert video_sec>=total-.22,('CRITICAL: Output has audio but truncated picture',video_sec,total)
+ assert len(set(x['id'] for x in timeline))==len(timeline)==6
  _,freeze=run(['ffmpeg','-hide_banner','-nostats','-i',mp4,'-vf','freezedetect=n=-57dB:d=0.85',
                '-an','-f','null','-'])
  freezes=[x.strip() for x in freeze.splitlines() if 'lavfi.freezedetect.freeze_start:' in x]
@@ -257,6 +274,7 @@ def main():
  report={'status':'PASS','duration_sec':dur,'resolution':'1080x1920','fps':30,
   'no_visual_source_reused':True,'source_video_count':4,'unique_photo_count':2,'repeated_video_count':0,
   'video_pct':round(100*sum(x['duration'] for x in timeline if x['type']=='video')/total,2),
+  'video_stream_duration_sec':video_sec,'picture_audio_difference_sec':round(dur-video_sec,4),
   'same_opening_v4':{'source':'pnas.2410420121.sm03.avi','source_offset':2.10,'text':SPEECH[0]},
   'audio':'Kokoro-82M af_heart speed 0.88, original ambient, AAC 192k',
   'two_row_top_left':True,'upper_central_extra_text':False,
