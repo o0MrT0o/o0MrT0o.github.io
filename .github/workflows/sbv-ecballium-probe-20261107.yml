@@ -1,0 +1,30 @@
+name: SBV Ecballium media probe
+on:
+  push:
+    branches: [sbv-exploding-cucumber-kokoro-20261107]
+    paths:
+      - 'sbv_ecballium_probe_20261107.py'
+      - '.github/workflows/sbv-ecballium-probe-20261107.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python3 -m pip install -q requests pillow
+      - name: Retrieve publisher research clips and create frame sheets
+        run: python3 -u sbv_ecballium_probe_20261107.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SBV_ECBALLIUM_MEDIA_PROBE
+          path: probe_output/
+          retention-days: 3
