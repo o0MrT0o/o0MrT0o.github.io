@@ -1,0 +1,28 @@
+name: SBV Ecballium independent 2025 source probe
+on:
+  push:
+    branches: [sbv-exploding-cucumber-kokoro-20261107]
+    paths:
+      - 'sbv_ecballium_gorges_probe.py'
+      - '.github/workflows/sbv-ecballium-gorges-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python3 -m pip install -q pillow requests
+      - name: Verify 2025 independent supplementary film and rights
+        run: python3 -u sbv_ecballium_gorges_probe.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SBV_GORGES_2025_ECBALLIUM_SOURCE_QA
+          path: new_ecballium_probe/
+          retention-days: 3
