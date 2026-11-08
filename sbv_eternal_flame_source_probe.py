@@ -9,6 +9,7 @@ base='https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b6/'+filename+
 urls=[
  base+'1080p.vp9.webm',
  base+'720p.vp9.webm',
+ base+'480p.vp9.webm',
  'https://commons.wikimedia.org/wiki/Special:Redirect/file/'+filename+'?width=1920',
  'https://commons.wikimedia.org/wiki/Special:FilePath/'+filename+'?width=1280',
  'https://upload.wikimedia.org/wikipedia/commons/b/b6/'+filename,
@@ -28,7 +29,7 @@ src=D/'FlameFallsCCBY.webm'
 for url in urls:
  time.sleep(.2)
  try:
-  with requests.get(url,timeout=50,stream=True,headers={'User-Agent':'StrangeButVerified/1.0 (educational media review)'}) as r:
+  with requests.get(url,timeout=50,stream=True,headers={'User-Agent':'StrangeButVerifiedCreator/1.0 (educational source inspection)', 'Referer':'https://commons.wikimedia.org/wiki/File:Burning_Eternal_Flame_Falls_Chestnut_Ridge_Park_NY_2025-09.webm', 'Origin':'https://commons.wikimedia.org'}) as r:
    print('GET',r.status_code,r.headers.get('Content-Type'),r.headers.get('Content-Length'),url,flush=True)
    r.raise_for_status()
    size=0
