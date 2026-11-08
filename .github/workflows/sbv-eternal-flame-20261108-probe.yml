@@ -1,0 +1,29 @@
+name: SBV Real 8K Eternal Flame Falls video forensic check
+on:
+  push:
+    branches: [sbv-eternal-flame-20261108]
+    paths:
+      - sbv_eternal_flame_source_probe.py
+      - .github/workflows/sbv-eternal-flame-20261108-probe.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg and Python imaging dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python3 -m pip install -q requests pillow
+      - name: Download actual licensed video and audit full timeline
+        run: python3 -u sbv_eternal_flame_source_probe.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SBV_Eternal_Flame_Original_Video_QA
+          path: eternal_flame_probe/
+          retention-days: 3
