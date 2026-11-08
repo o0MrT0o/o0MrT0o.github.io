@@ -1,0 +1,29 @@
+name: SBV Headless Chicken NOAA genuine HD videos quality audit
+on:
+  push:
+    branches: [sbv-headless-chicken-sources-20261108]
+    paths:
+      - sbv_headless_20261108_source_audit.py
+      - .github/workflows/sbv-headless-20261108-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install video inspection tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python3 -m pip install -q pillow requests
+      - name: Inspect four independent HD originals, produce 12-frame per-source contact sheets
+        run: python3 -u sbv_headless_20261108_source_audit.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SBV_HEADLESS_CHICKEN_NOAA_REAL_FOOTAGE_QUALITY_AUDIT
+          path: headless_qc/
+          retention-days: 7
