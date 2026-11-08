@@ -31,7 +31,7 @@ for n in ['01','02','03','04','07','08']:
  if not matches:matches=[base+'/'+key for key in keys if key.endswith('/'+name)]
  if not matches:
   print('NO_S3_MATCH',name,flush=True);continue
- u=matches[0]
+ u=matches[0].replace('s3://pmc-oa-opendata/','https://pmc-oa-opendata.s3.amazonaws.com/')
  try:
   with S.get(u,timeout=90,stream=True) as response:
    print('S3_VIDEO_GET',name,response.status_code,response.headers.get('content-type'),response.headers.get('content-length'),flush=True)
