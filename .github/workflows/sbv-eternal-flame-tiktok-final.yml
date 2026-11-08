@@ -1,4 +1,4 @@
-name: SBV Eternal Flame — 1080x1920 TikTok documentary video
+name: SBV Eternal Flame V2 — clear real fire and waterfall reveal
 on:
   push:
     branches: [sbv-eternal-flame-20261108]
@@ -48,7 +48,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release create sbv-eternal-flame-20261109-final \
+          gh release create sbv-eternal-flame-20261109-v2-clear-fire-reveal \
             eternal_flame_final/Strange_But_Verified_Eternal_Flame_TikTok_FINAL.mp4 \
             eternal_flame_final/CONTACT_SHEET.jpg \
             eternal_flame_final/SOURCES_AND_LICENSES.txt \
