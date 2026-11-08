@@ -70,7 +70,7 @@ def crop_clip(start,duration,name,wide):
  # Camera B: genuine wide waterfall source is 00.15–06.9s
  # The portrait crop for the wide shot includes both flame and falling water.
  # Preserve photographic geometry; never fabricate or mirror footage.
- pos=480 if wide else 649  # source dimensions 1920x1080, 608x1080 vertical crop
+ pos=645 if wide else 649  # flame visible at 70% width, real water still visible on left  # source dimensions 1920x1080, 608x1080 vertical crop
  # Close-up: 1920*?? screenshot fire at horizontal center; x=649 puts central 608 at x=953.
  filt=(f'fps=30,crop=608:1080:{pos}:0,scale=1080:1920:flags=lanczos,'
        'eq=contrast=1.055:saturation=1.07,unsharp=3:3:0.32:3:3:0,format=yuv420p')
