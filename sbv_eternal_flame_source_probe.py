@@ -3,15 +3,30 @@ import requests,subprocess,json
 from PIL import Image,ImageDraw
 D=Path('eternal_flame_source');D.mkdir(exist_ok=True)
 O=Path('eternal_flame_probe');O.mkdir(exist_ok=True)
-base='https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b6/Burning_Eternal_Flame_Falls_Chestnut_Ridge_Park_NY_2025-09.webm/Burning_Eternal_Flame_Falls_Chestnut_Ridge_Park_NY_2025-09.webm.'
-urls=[base+'1080p.vp9.webm',base+'720p.vp9.webm',
-      'https://upload.wikimedia.org/wikipedia/commons/b/b6/Burning_Eternal_Flame_Falls_Chestnut_Ridge_Park_NY_2025-09.webm']
+import urllib.parse,os,time
+filename='Burning_Eternal_Flame_Falls_Chestnut_Ridge_Park_NY_2025-09.webm'
+base='https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b6/'+filename+'/'+filename+'.'
+urls=[
+ base+'1080p.vp9.webm',
+ base+'720p.vp9.webm',
+ 'https://commons.wikimedia.org/wiki/Special:Redirect/file/'+filename+'?width=1920',
+ 'https://commons.wikimedia.org/wiki/Special:FilePath/'+filename+'?width=1280',
+ 'https://upload.wikimedia.org/wikipedia/commons/b/b6/'+filename,
+ base+'480p.vp9.webm',
+ 'https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/'+urllib.parse.quote(filename)+'&width=1280',
+ base+'360p.vp9.webm',
+]
+try:
+ api=requests.get('https://commons.wikimedia.org/w/api.php',params={'action':'query','titles':'File:'+filename,'prop':'videoinfo','viprop':'derivatives|url','format':'json'},timeout=18,headers={'User-Agent':'StrangeButVerifiedCreator/1.0 (educational)'})
+ print('COMMONS_API',api.status_code,api.text[:1200],flush=True)
+except Exception as e:print('API_FAILED',repr(e),flush=True)
 def sh(cmd):
  p=subprocess.run(cmd,capture_output=True,text=True)
  if p.returncode:raise RuntimeError(p.stderr[-500:])
  return p.stdout
 src=D/'FlameFallsCCBY.webm'
 for url in urls:
+ time.sleep(.2)
  try:
   with requests.get(url,timeout=50,stream=True,headers={'User-Agent':'StrangeButVerified/1.0 (educational media review)'}) as r:
    print('GET',r.status_code,r.headers.get('Content-Type'),r.headers.get('Content-Length'),url,flush=True)
