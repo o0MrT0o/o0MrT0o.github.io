@@ -6,46 +6,64 @@ from PIL import Image, ImageDraw, ImageFont
 D=Path('electric_nematode_originals');D.mkdir(exist_ok=True)
 O=Path('electric_nematode_probe');O.mkdir(exist_ok=True)
 S=requests.Session();S.headers.update({'User-Agent':'Mozilla/5.0 (compatible; educational research integrity audit)'})
-# Try publisher-hosted and PMC-hosted direct supplementary MP4s.
-# Europe PMC does not supply the supplementary ZIP for this recent PNAS article (NoSuchKey).
+# PMC open-access package endpoint is authoritative and avoids web-player anti-bot layers.
+import tarfile,xml.etree.ElementTree as ET
 contents=[]
-base='pnas.2503555122.sm'
-ids=['01','02','03','04','07','08']
-templates=[
- 'https://www.pnas.org/doi/suppl/10.1073/pnas.2503555122/suppl_file/{file}',
- 'https://pmc.ncbi.nlm.nih.gov/articles/instance/12557510/bin/{file}',
- 'https://pmc.ncbi.nlm.nih.gov/articles/PMC12557510/bin/{file}',
- 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12557510/bin/{file}',
- 'https://cdn.ncbi.nlm.nih.gov/pmc/articles/PMC12557510/bin/{file}',
-]
-# Observe availability and HTTP content type using tiny range requests before downloading full file.
-valid=[]
-for n in ids:
- name=f'{base}{n}.mp4'
- dest=D/name
- for template in templates:
-  u=template.format(file=name)
-  try:
-   response=S.get(u,headers={'Range':'bytes=0-65535','Referer':'https://www.pnas.org/'},timeout=18,stream=True,allow_redirects=True)
-   typ=response.headers.get('content-type','')
-   size=int(response.headers.get('content-length') or 0)
-   print('CHECK',n,response.status_code,typ,size,response.url[:130],flush=True)
-   if response.status_code not in [200,206] or not any(x in typ for x in ('video/','octet-stream','application/mp4')):response.close();continue
-   response.close()
-   with S.get(u,timeout=110,stream=True,headers={'Referer':'https://www.pnas.org/'}) as rr:
-    rr.raise_for_status()
-    with open(dest,'wb') as f:
-     total=0
-     for b in rr.iter_content(1024*1024):
-      if b:
-       total+=len(b);f.write(b)
-       if total>55000000:raise RuntimeError('over size limit')
-   print('DOWNLOADED',name,dest.stat().st_size,flush=True)
-   if dest.stat().st_size>100000:valid.append(name);break
-  except Exception as e:
-   print('FAILED',name,type(e).__name__,str(e)[:180],flush=True)
-   dest.unlink(missing_ok=True)
-print('RETRIEVED',valid,flush=True)
+OA='https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi?id=PMC12557510'
+try:
+ oa=S.get(OA,timeout=30);print('OA_RESPONSE',oa.status_code,oa.url,oa.text[:1800],flush=True)
+ roots=ET.fromstring(oa.text)
+ archive_links=[a.attrib.get('href','') for a in roots.iter() if a.tag=='link' and a.attrib.get('format') in ('tgz','tar.gz')]
+ print('OA_ARCHIVES',archive_links,flush=True)
+ for link in archive_links[:2]:
+  u=link.replace('ftp://ftp.ncbi.nlm.nih.gov/','https://ftp.ncbi.nlm.nih.gov/')
+  dst=D/'open_access_package.tar.gz'
+  with S.get(u,timeout=160,stream=True) as res:
+   print('OA_TAR',res.status_code,res.headers.get('content-type'),res.headers.get('content-length'),flush=True)
+   res.raise_for_status()
+   with open(dst,'wb') as f:
+    n=0
+    for b in res.iter_content(1024*1024):
+     if b:
+      f.write(b);n+=len(b)
+      if n>350000000:raise RuntimeError('OA package larger than 350MB')
+  with tarfile.open(dst,'r:gz') as z:
+   contents=[(x.name,x.size) for x in z.getmembers()]
+   print('OA_TAR_LIST',json.dumps(contents[:90]),flush=True)
+   for mem in z.getmembers():
+    if mem.isfile() and mem.name.lower().endswith(('.mp4','.avi','.mov')) and mem.size<60_000_000:
+     with z.extractfile(mem) as inp,open(D/Path(mem.name).name,'wb') as out:shutil.copyfileobj(inp,out)
+except Exception as e:
+ print('OA_ERROR',type(e).__name__,repr(e)[:850],flush=True)
+
+# As an independent fallback, some authors share movies on Zenodo.
+try:
+ zen=S.get('https://zenodo.org/api/records/17203860',timeout=25)
+ print('ZENODO',zen.status_code,zen.text[:1800],flush=True)
+ if zen.status_code==200:
+  z=zen.json()
+  print('ZEN_FILES',[(f.get('key'),f.get('size'),f.get('links',{}).get('self')) for f in z.get('files',[])][:35],flush=True)
+except Exception as e:print('ZEN_ERROR',repr(e)[:400],flush=True)
+
+# Last resort: publisher's individual supplementary original MP4s.
+if not any(p.suffix.lower()=='.mp4' for p in D.iterdir()):
+ for n in ['01','02','03','04','07','08']:
+  name=f'pnas.2503555122.sm{n}.mp4'
+  urls=[
+   f'https://www.pnas.org/doi/suppl/10.1073/pnas.2503555122/suppl_file/{name}',
+   f'https://pmc.ncbi.nlm.nih.gov/articles/instance/12557510/bin/{name}',
+  ]
+  for u in urls:
+   try:
+    with S.get(u,timeout=12,stream=True) as res:
+     print('DIRECT',n,res.status_code,res.headers.get('content-type'),flush=True)
+     if res.status_code!=200 or not any(x in res.headers.get('content-type','').lower() for x in ['video','octet-stream']):continue
+     dest=D/name
+     with open(dest,'wb') as f:
+      for b in res.iter_content(1024*1024):
+       if b:f.write(b)
+     break
+   except Exception as e:print('DIRECT ERROR',repr(e)[:150],flush=True)
 def ff(cmd):
  o=subprocess.run(cmd,capture_output=True,text=True)
  if o.returncode:raise RuntimeError(' '.join(map(str,cmd[:7]))+'\n'+o.stderr[-800:])
