@@ -6,64 +6,48 @@ from PIL import Image, ImageDraw, ImageFont
 D=Path('electric_nematode_originals');D.mkdir(exist_ok=True)
 O=Path('electric_nematode_probe');O.mkdir(exist_ok=True)
 S=requests.Session();S.headers.update({'User-Agent':'Mozilla/5.0 (compatible; educational research integrity audit)'})
-# PMC open-access package endpoint is authoritative and avoids web-player anti-bot layers.
-import tarfile,xml.etree.ElementTree as ET
+# PMC retired legacy OA service in August 2026.
+# The officially supported unsigned S3 Cloud Service holds individual original supplementary files.
+import xml.etree.ElementTree as ET
+base='https://pmc-oa-opendata.s3.amazonaws.com'
+art='PMC12557510.1'
+r=S.get(base+'/',params={'list-type':'2','prefix':art+'/'},timeout=35)
+print('S3_LIST',r.status_code,r.url,r.text[:1800],flush=True);r.raise_for_status()
+root=ET.fromstring(r.text)
+keys=[x.text for x in root.iter() if x.tag.rsplit('}',1)[-1]=='Key' and x.text]
+print('S3_KEYS',keys,flush=True)
+metadata_url=f'{base}/{art}/{art}.json'
+m=S.get(metadata_url,timeout=35)
+print('S3_METADATA',m.status_code,m.text[:1500],flush=True)
+if m.status_code==200:
+ obj=m.json()
+ print('S3_LICENSE',obj.get('license_code'),'MEDIA_URLS',len(obj.get('media_urls') or []),flush=True)
+ media_urls=obj.get('media_urls') or []
+else:media_urls=[]
 contents=[]
-OA='https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi?id=PMC12557510'
-try:
- oa=S.get(OA,timeout=30);print('OA_RESPONSE',oa.status_code,oa.url,oa.text[:1800],flush=True)
- roots=ET.fromstring(oa.text)
- archive_links=[a.attrib.get('href','') for a in roots.iter() if a.tag=='link' and a.attrib.get('format') in ('tgz','tar.gz')]
- print('OA_ARCHIVES',archive_links,flush=True)
- for link in archive_links[:2]:
-  u=link.replace('ftp://ftp.ncbi.nlm.nih.gov/','https://ftp.ncbi.nlm.nih.gov/')
-  dst=D/'open_access_package.tar.gz'
-  with S.get(u,timeout=160,stream=True) as res:
-   print('OA_TAR',res.status_code,res.headers.get('content-type'),res.headers.get('content-length'),flush=True)
-   res.raise_for_status()
+for n in ['01','02','03','04','07','08']:
+ name=f'pnas.2503555122.sm{n}.mp4'
+ matches=[x for x in media_urls if name in x]
+ if not matches:matches=[base+'/'+key for key in keys if key.endswith('/'+name)]
+ if not matches:
+  print('NO_S3_MATCH',name,flush=True);continue
+ u=matches[0]
+ try:
+  with S.get(u,timeout=90,stream=True) as response:
+   print('S3_VIDEO_GET',name,response.status_code,response.headers.get('content-type'),response.headers.get('content-length'),flush=True)
+   response.raise_for_status()
+   dst=D/name
+   size=0
    with open(dst,'wb') as f:
-    n=0
-    for b in res.iter_content(1024*1024):
-     if b:
-      f.write(b);n+=len(b)
-      if n>350000000:raise RuntimeError('OA package larger than 350MB')
-  with tarfile.open(dst,'r:gz') as z:
-   contents=[(x.name,x.size) for x in z.getmembers()]
-   print('OA_TAR_LIST',json.dumps(contents[:90]),flush=True)
-   for mem in z.getmembers():
-    if mem.isfile() and mem.name.lower().endswith(('.mp4','.avi','.mov')) and mem.size<60_000_000:
-     with z.extractfile(mem) as inp,open(D/Path(mem.name).name,'wb') as out:shutil.copyfileobj(inp,out)
-except Exception as e:
- print('OA_ERROR',type(e).__name__,repr(e)[:850],flush=True)
-
-# As an independent fallback, some authors share movies on Zenodo.
-try:
- zen=S.get('https://zenodo.org/api/records/17203860',timeout=25)
- print('ZENODO',zen.status_code,zen.text[:1800],flush=True)
- if zen.status_code==200:
-  z=zen.json()
-  print('ZEN_FILES',[(f.get('key'),f.get('size'),f.get('links',{}).get('self')) for f in z.get('files',[])][:35],flush=True)
-except Exception as e:print('ZEN_ERROR',repr(e)[:400],flush=True)
-
-# Last resort: publisher's individual supplementary original MP4s.
-if not any(p.suffix.lower()=='.mp4' for p in D.iterdir()):
- for n in ['01','02','03','04','07','08']:
-  name=f'pnas.2503555122.sm{n}.mp4'
-  urls=[
-   f'https://www.pnas.org/doi/suppl/10.1073/pnas.2503555122/suppl_file/{name}',
-   f'https://pmc.ncbi.nlm.nih.gov/articles/instance/12557510/bin/{name}',
-  ]
-  for u in urls:
-   try:
-    with S.get(u,timeout=12,stream=True) as res:
-     print('DIRECT',n,res.status_code,res.headers.get('content-type'),flush=True)
-     if res.status_code!=200 or not any(x in res.headers.get('content-type','').lower() for x in ['video','octet-stream']):continue
-     dest=D/name
-     with open(dest,'wb') as f:
-      for b in res.iter_content(1024*1024):
-       if b:f.write(b)
-     break
-   except Exception as e:print('DIRECT ERROR',repr(e)[:150],flush=True)
+    for chunk in response.iter_content(1024*1024):
+     if chunk:
+      size+=len(chunk)
+      if size>40_000_000:raise RuntimeError('movie over cap')
+      f.write(chunk)
+  if size<200000:raise RuntimeError('not real MP4')
+  contents.append((name,size));print('S3_OK',name,size,flush=True)
+ except Exception as exc:print('S3_FILE_ERROR',name,repr(exc),flush=True)
+print('RETRIEVED',contents,flush=True)
 def ff(cmd):
  o=subprocess.run(cmd,capture_output=True,text=True)
  if o.returncode:raise RuntimeError(' '.join(map(str,cmd[:7]))+'\n'+o.stderr[-800:])
