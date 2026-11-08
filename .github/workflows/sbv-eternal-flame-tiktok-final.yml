@@ -1,0 +1,59 @@
+name: SBV Eternal Flame — 1080x1920 TikTok documentary video
+on:
+  push:
+    branches: [sbv-eternal-flame-20261108]
+    paths:
+      - 'sbv_eternal_flame_tiktok_final.py'
+      - '.github/workflows/sbv-eternal-flame-tiktok-final.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Kokoro, FFmpeg and Montserrat; verify model hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-montserrat
+          python -m pip install -q 'kokoro-onnx==0.6.1' 'soundfile>=0.12,<1' 'numpy<3' 'scipy>=1.10,<2' 'pillow>=10,<13' requests espeakng-loader
+          mkdir -p models
+          curl -fLSs --retry 5 --retry-delay 4 --max-time 500 https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/kokoro-v1.0.onnx -o models/kokoro-v1.0.onnx
+          curl -fLSs --retry 5 --retry-delay 4 --max-time 500 https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/voices-v1.0.bin -o models/voices-v1.0.bin
+          echo 'beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a  models/kokoro-v1.0.onnx' | sha256sum --check
+          echo 'bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d  models/voices-v1.0.bin' | sha256sum --check
+      - name: Assemble real waterfall and flame footage, voice, subtitles and four-layer sound; full decode QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -u sbv_eternal_flame_tiktok_final.py
+      - name: Upload the actual full-quality TikTok MP4, original source and source-based QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_ETERNAL_FLAME_KOKORO_TIKTOK_FINAL
+          path: eternal_flame_final/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish downloadable MP4 directly to GitHub, NOT on TikTok
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create sbv-eternal-flame-20261109-final \
+            eternal_flame_final/Strange_But_Verified_Eternal_Flame_TikTok_FINAL.mp4 \
+            eternal_flame_final/CONTACT_SHEET.jpg \
+            eternal_flame_final/SOURCES_AND_LICENSES.txt \
+            eternal_flame_final/QA.json \
+            eternal_flame_final/ENGLISH_NARRATION.txt \
+            --repo '${{ github.repository }}' --target '${{ github.sha }}' \
+            --title 'Strange But Verified — REAL Eternal Flame Falls — TikTok Master 1080x1920' \
+            --notes 'Professionally edited TikTok / YouTube Shorts master made exclusively from G. Edward Johnson 2025 real CC BY 4.0 waterfall footage, two authentic distinct takes (flame close-up immediately at frame 0, wide waterfall reveal), Kokoro af_heart narration, on-screen attribution, captions, original sound design and automated no-freeze, no-black, full-length audio/video QA. This is a download release only; not posted to social channels.'
