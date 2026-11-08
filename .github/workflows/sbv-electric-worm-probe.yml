@@ -1,0 +1,29 @@
+name: SBV Electric Parasite 2025 PNAS HD movie probe
+on:
+  push:
+    branches: [sbv-electric-parasite-kokoro-20261108]
+    paths:
+      - 'sbv_electric_worm_probe.py'
+      - '.github/workflows/sbv-electric-worm-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FFmpeg, PIL and requests
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python3 -m pip install -q requests pillow
+      - name: Download all scientific supplementary MP4 clips and audit sample frames
+        run: python3 -u sbv_electric_worm_probe.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SBV_ELECTRIC_WORM_ORIGINAL_MOVIES_QA
+          path: electric_nematode_probe/
+          retention-days: 3
