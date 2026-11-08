@@ -6,21 +6,46 @@ from PIL import Image, ImageDraw, ImageFont
 D=Path('electric_nematode_originals');D.mkdir(exist_ok=True)
 O=Path('electric_nematode_probe');O.mkdir(exist_ok=True)
 S=requests.Session();S.headers.update({'User-Agent':'Mozilla/5.0 (compatible; educational research integrity audit)'})
-URL='https://www.ebi.ac.uk/europepmc/webservices/rest/PMC12557510/supplementaryFiles'
-p=D/'PNAS_2503555122_supplementary.zip'
-with S.get(URL,timeout=170,stream=True) as r:
- print('ZIP HTTP',r.status_code,r.headers.get('content-type'),r.headers.get('content-length'),flush=True);r.raise_for_status()
- with open(p,'wb') as f:
-  for b in r.iter_content(1024*1024):
-   if b:f.write(b)
-print('Downloaded zip',p.stat().st_size,flush=True)
-with zipfile.ZipFile(p) as z:
- contents=[(i.filename,i.file_size) for i in z.infolist()]
- print('FILES',json.dumps(contents,indent=2),flush=True)
- for i in z.infolist():
-  if Path(i.filename).suffix.lower() in ('.mp4','.avi','.mov','.m4v') and i.file_size<60_000_000:
-   dst=D/Path(i.filename).name
-   with z.open(i) as src,open(dst,'wb') as out:shutil.copyfileobj(src,out)
+# Try publisher-hosted and PMC-hosted direct supplementary MP4s.
+# Europe PMC does not supply the supplementary ZIP for this recent PNAS article (NoSuchKey).
+contents=[]
+base='pnas.2503555122.sm'
+ids=['01','02','03','04','07','08']
+templates=[
+ 'https://www.pnas.org/doi/suppl/10.1073/pnas.2503555122/suppl_file/{file}',
+ 'https://pmc.ncbi.nlm.nih.gov/articles/instance/12557510/bin/{file}',
+ 'https://pmc.ncbi.nlm.nih.gov/articles/PMC12557510/bin/{file}',
+ 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12557510/bin/{file}',
+ 'https://cdn.ncbi.nlm.nih.gov/pmc/articles/PMC12557510/bin/{file}',
+]
+# Observe availability and HTTP content type using tiny range requests before downloading full file.
+valid=[]
+for n in ids:
+ name=f'{base}{n}.mp4'
+ dest=D/name
+ for template in templates:
+  u=template.format(file=name)
+  try:
+   response=S.get(u,headers={'Range':'bytes=0-65535','Referer':'https://www.pnas.org/'},timeout=18,stream=True,allow_redirects=True)
+   typ=response.headers.get('content-type','')
+   size=int(response.headers.get('content-length') or 0)
+   print('CHECK',n,response.status_code,typ,size,response.url[:130],flush=True)
+   if response.status_code not in [200,206] or not any(x in typ for x in ('video/','octet-stream','application/mp4')):response.close();continue
+   response.close()
+   with S.get(u,timeout=110,stream=True,headers={'Referer':'https://www.pnas.org/'}) as rr:
+    rr.raise_for_status()
+    with open(dest,'wb') as f:
+     total=0
+     for b in rr.iter_content(1024*1024):
+      if b:
+       total+=len(b);f.write(b)
+       if total>55000000:raise RuntimeError('over size limit')
+   print('DOWNLOADED',name,dest.stat().st_size,flush=True)
+   if dest.stat().st_size>100000:valid.append(name);break
+  except Exception as e:
+   print('FAILED',name,type(e).__name__,str(e)[:180],flush=True)
+   dest.unlink(missing_ok=True)
+print('RETRIEVED',valid,flush=True)
 def ff(cmd):
  o=subprocess.run(cmd,capture_output=True,text=True)
  if o.returncode:raise RuntimeError(' '.join(map(str,cmd[:7]))+'\n'+o.stderr[-800:])
