@@ -1,0 +1,25 @@
+name: SBV Wikimedia real source multi-frame probe
+on:
+  push:
+    branches: [sbv-eternal-flame-20261108]
+    paths:
+      - 'sbv_flame_wikimedia_frame_probe.py'
+      - '.github/workflows/sbv-flame-timecode-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip3 install -q --break-system-packages pillow requests
+      - name: Check real flame video timecoded thumbnails from Wikimedia
+        run: python3 -u sbv_flame_wikimedia_frame_probe.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SBV_FLAME_WIKIMEDIA_FRAME_TIMECODE_PROBE
+          path: flame_frame_test/
+          retention-days: 3
