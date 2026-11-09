@@ -1,0 +1,31 @@
+name: Recover author original Eternal Flame 4K for TikTok quality
+on:
+  push:
+    branches: [sbv-eternal-flame-higher-quality-20261109]
+    paths:
+      - sbv_eternal_flame_hires_probe.py
+      - .github/workflows/sbv-eternal-flame-hirecovery.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install video dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python3 -m pip install -q requests
+      - name: Verify and transcode original authentic author footage to 4K
+        run: python3 -u sbv_eternal_flame_hires_probe.py
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: SBV_Eternal_Flame_True4K_Source
+          path: |
+            flame_hires/SBV_ETERNAL_FLAME_ORIGINAL_HIRES_4K.mp4
+            flame_hires/SOURCE_CREDIT.txt
+          retention-days: 3
