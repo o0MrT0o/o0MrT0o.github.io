@@ -29,8 +29,8 @@ src=D/'FlameFallsCCBY.webm'
 for url in urls:
  time.sleep(.2)
  try:
-  with requests.get(url,timeout=50,stream=True,headers={'User-Agent':'StrangeButVerifiedCreator/1.0 (educational source inspection)', 'Referer':'https://commons.wikimedia.org/wiki/File:Burning_Eternal_Flame_Falls_Chestnut_Ridge_Park_NY_2025-09.webm', 'Origin':'https://commons.wikimedia.org'}) as r:
-   print('GET',r.status_code,r.headers.get('Content-Type'),r.headers.get('Content-Length'),url,flush=True)
+  with requests.get(url,timeout=50,stream=True,headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0','Referer':'https://commons.wikimedia.org/wiki/File:Burning_Eternal_Flame_Falls_Chestnut_Ridge_Park_NY_2025-09.webm','Accept':'video/webm,video/*;q=0.9,*/*;q=0.8'}) as r:
+   print('GET',r.status_code,r.headers.get('Content-Type'),r.headers.get('Content-Length'),'retry_after',r.headers.get('Retry-After'),url,flush=True)
    r.raise_for_status()
    size=0
    with open(src,'wb') as f:
