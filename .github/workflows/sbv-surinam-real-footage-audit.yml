@@ -1,0 +1,28 @@
+name: SBV Surinam Toad real birth footage and licensing audit
+on:
+  push:
+    branches: [sbv-surinaam-toad-real-birth-20261109]
+    paths:
+      - sbv_surinam_source_audit.py
+      - .github/workflows/sbv-surinam-real-footage-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install analysis tools
+        run: |
+          python3 -m pip install -q --upgrade yt-dlp pillow requests
+          ffmpeg -version | head -1
+      - name: Validate YouTube Creative Commons license and genuine footage
+        run: python3 -u sbv_surinam_source_audit.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SBV_Surinam_Real_Source_Research
+          path: surinam_source_audit/
+          retention-days: 2
