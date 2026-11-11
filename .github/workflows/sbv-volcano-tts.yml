@@ -1,0 +1,35 @@
+name: SBV original volcano short English Kokoro narrator
+on:
+  push:
+    branches: [sbv-volcanic-whirlwinds-actual-video-20261111]
+    paths:
+      - sbv_volcano_tts.py
+      - .github/workflows/sbv-volcano-tts.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install verified Kokoro narration model
+        run: |
+          set -euo pipefail
+          python -m pip install -q 'kokoro-onnx==0.6.1' 'soundfile>=0.12,<1' 'numpy<3' espeakng-loader
+          mkdir -p models
+          curl -fLSs --retry 5 --retry-delay 4 --max-time 500 https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/kokoro-v1.0.onnx -o models/kokoro-v1.0.onnx
+          curl -fLSs --retry 5 --retry-delay 4 --max-time 500 https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/voices-v1.0.bin -o models/voices-v1.0.bin
+          echo 'beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a  models/kokoro-v1.0.onnx' | sha256sum --check
+          echo 'bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d  models/voices-v1.0.bin' | sha256sum --check
+      - name: Generate new voice
+        run: python3 -u sbv_volcano_tts.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SBV_Volcanic_Whirlwind_Kokoro_af_heart
+          path: sbv_volcano_voice/
+          retention-days: 3
