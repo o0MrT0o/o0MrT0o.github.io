@@ -1,0 +1,27 @@
+name: SBV Pipa V11 alternate genuine video audit
+on:
+  push:
+    branches: [sbv-surinaam-toad-real-birth-20261109]
+    paths:
+      - pipa_v11_alternate_video.py
+      - .github/workflows/pipa-v11-video.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source_audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python3 -m pip install -q -U yt-dlp Pillow
+      - run: python3 -u pipa_v11_alternate_video.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: PIPA_V11_Alternative_Video_Research
+          path: pipa_v11_sources/
+          retention-days: 3
