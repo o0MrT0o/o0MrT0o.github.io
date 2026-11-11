@@ -1,0 +1,29 @@
+name: SBV USGS volcanic vortex public domain footage recovery
+on:
+  push:
+    branches: [sbv-volcanic-whirlwinds-actual-video-20261111]
+    paths:
+      - sbv_volcano_source_audit.py
+      - .github/workflows/sbv-volcano-source-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install video analysis
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python3 -m pip install -q Pillow
+      - name: Download and transcode Public Domain USGS real footage
+        run: python3 -u sbv_volcano_source_audit.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SBV_USGS_Volcano_Video_Originals_ProxyAndAudit
+          path: sbv_volcano_source/
+          retention-days: 3
