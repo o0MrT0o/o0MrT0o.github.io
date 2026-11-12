@@ -1,0 +1,30 @@
+name: SBV single strontium atom - footage audit
+on:
+  push:
+    branches: [sbv-single-atom-video-20261112]
+    paths:
+      - sbv_atom_source_audit.py
+      - .github/workflows/sbv-atom-video-sources.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install video and web dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python3 -m pip install -q requests Pillow beautifulsoup4
+      - name: Download scientific experimental recordings and verify metadata
+        run: python3 -u sbv_atom_source_audit.py
+      - name: Export review sources
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SBV_Single_Atom_Real_Video_Sources
+          path: atom_video_source/
+          retention-days: 3
