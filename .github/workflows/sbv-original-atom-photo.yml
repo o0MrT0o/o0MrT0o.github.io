@@ -1,0 +1,24 @@
+name: SBV locate original Oxford atom photograph
+on:
+  push:
+    branches: [sbv-single-atom-video-20261112]
+    paths:
+      - sbv_original_atom_photo.py
+      - .github/workflows/sbv-original-atom-photo.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install -q requests beautifulsoup4
+      - run: python3 -u sbv_original_atom_photo.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SBV_Original_Oxford_Atom_Photo_Research
+          path: single_atom_original_image/
+          retention-days: 3
